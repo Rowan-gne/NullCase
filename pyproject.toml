@@ -9,6 +9,7 @@ dependencies = ["nullcase-pytest"]
 dev = [
     "pyright>=1.1.414",
     "pytest>=9.1",
+    "pytest-xdist>=3.8",
     "ruff>=0.16",
 ]
 
@@ -37,3 +38,4 @@ venv = ".venv"
 
 [tool.pytest.ini_options]
 testpaths = ["packages"]
+addopts = ["-p", "pytester", "--import-mode=importlib"]

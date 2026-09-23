@@ -28,6 +28,15 @@ is rules and current status only; it does not repeat that document.
    integration, Fly deployment, or Next.js dashboard here — those live
    in a separate private repo.
 
+> **Note on docs/technical-guide.md:** §6.2 describes a single monorepo
+> containing apps/api, apps/worker, apps/web, packages/core, and infra/
+> alongside the public pieces. That reflects an earlier plan. This
+> repository holds only the public, open-core subset: packages/pytest-
+> plugin, sandbox/, eval/, and (later) packages/upload-action. Everywhere
+> else in the document, treat the architecture, data model, and design
+> rationale as authoritative — only §6.2's *file layout* has been
+> superseded by this split.
+
 ## Current status
 
 Bootstrapping. No product code yet. See docs/technical-guide.md for the

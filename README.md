@@ -10,8 +10,8 @@ in private development.** Nothing here is released on PyPI or the GitHub
 Marketplace yet.
 
 Full design: [docs/technical-guide.md](docs/technical-guide.md). This repository
-covers the pytest plugin, the experiment battery and the evaluation harness. The
-file layout in §6.2 of that guide describes an earlier single-repo plan and
+covers the pytest plugin, the experiment battery, the evaluation harness,
+example-test retrieval and the upload action. The file layout in §6.2 of that guide describes an earlier single-repo plan and
 does not apply here.
 
 ## What's implemented
@@ -19,9 +19,10 @@ does not apply here.
 | Component | Path | Implemented | Not yet |
 |---|---|---|---|
 | pytest plugin | [packages/pytest-plugin](packages/pytest-plugin) | per-test outcome, duration, file path and node ID written to a local JSON Lines file | upload to a backend (OIDC), quarantine list (stub returns empty), CI metadata |
-| Experiment battery | [sandbox](sandbox) | baseline, order, hash-seed, network-off, timezone and parallel perturbations; Wilson-interval diagnosis; confirmed repro commands; CLI; Dockerfile | running on Fly Machines, coverage check for new tests |
+| Experiment battery | [sandbox](sandbox) | baseline, order, hash-seed, network-off, timezone and parallel perturbations; Wilson-interval diagnosis; confirmed repro commands; single-test coverage check for target lines (`nullcase-coverage`); CLIs; Dockerfile | running on Fly Machines; coverage check not yet part of an acceptance gate |
 | Evaluation harness | [eval](eval) | demo repo with six seeded flaky tests; harness that scores the battery against their labels | a published external flaky-test dataset |
-| Upload GitHub Action | — | — | everything |
+| Upload GitHub Action | [packages/upload-action](packages/upload-action) | composite action that installs the plugin and runs pytest with local results | the upload itself (stub prints a TODO notice); not yet run on a real Actions runner |
+| Example-test retrieval | [packages/retrieval](packages/retrieval) | `ast` import graph; tests that import a target module, ranked by name/path similarity | embedding fallback (stub raises `NotImplementedError`) |
 
 ## Requirements
 

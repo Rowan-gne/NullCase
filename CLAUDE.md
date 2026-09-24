@@ -56,6 +56,9 @@ packages/upload-action wraps the plugin as a composite GitHub Action, but it
 hasn't run on a real Actions runner. Stubbed until a backend exists:
 remote upload (RemoteUploadSink and the action's upload step), the quarantine
 list (always empty), retrieval's pgvector embedding fallback, and any
-AI-generated fixes or tests (there is no LLM layer here). This is the last
+AI-generated fixes or tests (there is no LLM layer here). Release prep for 0.1.0
+is in place (release.yml with PyPI Trusted Publishing, a stand-alone
+upload-action export, RELEASING.md), but nothing has been tagged or
+published, and PyPI/Marketplace setup is still the user's to do. This is the last
 public-repo work before the wall; the backend, GitHub App, billing,
 deployment and dashboard belong in the private repo (rule 6).

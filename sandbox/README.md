@@ -28,6 +28,19 @@ perturbation with the largest rate change sets the category: `order_dependent`,
 the baseline decides: some failures → `timing`, all failures →
 `fails_consistently`, none → `not_reproduced`.
 
+**Deterministic flip.** The interval rule can't catch a factor whose effect is
+a fixed function of its setting when the pinned baseline setting sits on the
+rare side. An example is a hash-order test that fails under
+`PYTHONHASHSEED=0` but passes under a quarter of other seeds: 20/20 against
+15/20 isn't separable at 20 runs. So when the baseline never varied (0 or all
+failures) and no perturbation is significant, the battery takes each setting
+of order, hash seed, timezone or network-off that produced the opposite
+outcome and replays it 3 times. If every replay flips, that perturbation's
+category is reported with method `deterministic_flip`. Parallel runs are
+excluded because they aren't deterministic. The report's `method` field says
+which path decided: `wilson_interval`, `deterministic_flip` or
+`baseline_only`.
+
 **Repro.** For order, hash seed, timezone and network, the battery replays the
 failing setting 3 times and prints the command only if it fails all 3. Parallel
 and timing failures are not deterministic, so no repro is printed for them.
@@ -70,10 +83,10 @@ nothing generates tests yet.
 
 ## Limitations
 
-- With the baseline pinned at `PYTHONHASHSEED=0`, a hash-order test that
-  happens to fail under seed 0 fails every baseline run, and varying the seed
-  rarely moves the rate enough to be significant. It is then reported as
-  `fails_consistently`.
+- The deterministic-flip check was added after the eval harness exposed the
+  hash-order miss (see the root README). It rests on 3 unanimous replays, so a
+  low-rate timing flake could in principle look deterministic. That's
+  unlikely, but it's weaker evidence than the interval rule.
 - The timezone result depends on the time of day the battery runs.
 - Under `--network none` the baseline itself has no network, so a
   network-dependent test fails every run rather than being diagnosed as

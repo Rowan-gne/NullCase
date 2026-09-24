@@ -1,0 +1,30 @@
+name: self-test
+
+# Runs this action on a real runner against a tiny fixture suite.
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  self-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - id: nullcase
+        uses: ./
+        with:
+          working-directory: self-test
+          pytest-args: "-q"
+
+      - name: Check results
+        env:
+          RESULTS: ${{ steps.nullcase.outputs.results-path }}
+        run: python self-test/check_results.py "$RESULTS"

@@ -250,7 +250,7 @@ wheels = [
 
 [[package]]
 name = "nullcase-pytest"
-version = "0.0.0"
+version = "0.1.0"
 source = { editable = "packages/pytest-plugin" }
 dependencies = [
     { name = "pytest" },
@@ -261,12 +261,12 @@ requires-dist = [{ name = "pytest", specifier = ">=8.0" }]
 
 [[package]]
 name = "nullcase-retrieval"
-version = "0.0.0"
+version = "0.1.0"
 source = { editable = "packages/retrieval" }
 
 [[package]]
 name = "nullcase-sandbox"
-version = "0.0.0"
+version = "0.1.0"
 source = { editable = "sandbox" }
 dependencies = [
     { name = "coverage" },

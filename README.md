@@ -1,7 +1,7 @@
 # NullCase
 
 [![CI](https://github.com/Rowan-gne/NullCase/actions/workflows/ci.yml/badge.svg)](https://github.com/Rowan-gne/NullCase/actions/workflows/ci.yml)
-![Python 3.11–3.13](https://img.shields.io/badge/python-3.11%E2%80%933.13-blue)
+![Python 3.11–3.14](https://img.shields.io/badge/python-3.11%E2%80%933.14-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 **Finds out *why* a flaky pytest test is flaky, by controlled experiment.**
@@ -44,15 +44,15 @@ stated otherwise. Every number can be reproduced with the commands in
 
 | Metric | Result |
 |---|---|
-| Test suite | **60 tests, all passing in 3 of 3 consecutive runs** (30.4 s, 31.1 s, 30.4 s) |
-| Branch coverage | **85%** overall, including code the tests run in child processes. Plugin 100%, retrieval 96–100%, battery core 91–100%. The two CLI front-ends are the gap (35% and 0%). |
+| Test suite | **68 tests, all passing in 3 of 3 consecutive runs** (48.4 s, 48.3 s, 46.8 s) |
+| Branch coverage | **96%** overall, including code the tests run in child processes. Plugin 100%; retrieval 96–100%; battery, diagnosis and CLIs 92–100% |
 | Property-based tests | 11 [Hypothesis](https://hypothesis.readthedocs.io/) properties covering the statistics and diagnosis rules |
 | Type checking | pyright **strict** mode, 0 errors |
-| CI (GitHub Actions) | Green on the last 3 pushes to `main`, 45–66 s per run (lint, format, type check, tests) |
+| CI (GitHub Actions) | 9 jobs, about 105 s per run: lint and strict type check; tests on Python 3.11, 3.12, 3.13 and 3.14; tests against the lowest declared dependency versions; wheel build plus clean-virtualenv smoke test; the GitHub Action on a real runner; the Docker image. Green on every push since the first. |
 | Diagnosis eval | **6 of 6** seeded flaky tests diagnosed correctly, in 3 of 3 full runs (first version: 5 of 6; see [Eval results](#eval-results)) |
 | Full eval run time | 204 s for all six tests (120 isolated pytest runs per test, plus confirmation replays) |
 | One battery run | about 31 s for one test at default settings (20 baseline runs plus 20 runs for each of 5 perturbations) |
-| Code size | about 930 lines of product code, 570 lines of tests (non-blank, non-comment) |
+| Code size | about 930 lines of product code, 680 lines of tests (non-blank, non-comment) |
 
 ## How it works
 
@@ -104,11 +104,15 @@ data.
   resolving relative imports, to find existing tests that are good style
   examples for a module.
 - **Release engineering.** A tag-triggered release workflow checks that every
-  version matches, runs the tests, builds, runs `twine check --strict`, and is
-  set up to publish through PyPI Trusted Publishing, so no API tokens are
-  stored. It hasn't run yet because nothing has been tagged. Clean builds were
-  installed in a fresh virtualenv, which caught a real CLI argument-parsing bug
-  before release.
+  version matches, runs the tests, builds, runs `twine check --strict`,
+  smoke-tests the wheels in a clean virtualenv, and is set up to publish through
+  PyPI Trusted Publishing, so no API tokens are stored. It hasn't run yet
+  because nothing has been tagged. The same smoke test runs in CI, and it caught
+  a real CLI argument-parsing bug before release.
+- **Supply-chain hygiene.** Every GitHub Action is pinned to a commit SHA, and
+  Dependabot keeps the actions, the uv lockfile and the Docker base image
+  current. `pip-audit` found no known vulnerabilities in the locked
+  dependencies (checked 2026-09-24).
 
 ## Components
 
@@ -118,7 +122,7 @@ data.
 | [Experiment battery](sandbox) | The perturbations, diagnosis and repro commands; a single-test line-coverage check (`nullcase-coverage`); Dockerfile | running on remote sandbox VMs |
 | [Eval harness](eval) | Six seeded flaky tests, one per category, and a harness that scores the battery against their labels | an external, published flaky-test dataset |
 | [Retrieval](packages/retrieval) | Import-graph search for example tests, ranked by name and path similarity | embedding-based fallback (stub) |
-| [Upload action](packages/upload-action) | Composite GitHub Action that runs pytest with the plugin; linted with actionlint | the upload itself (stub); not yet run on a real Actions runner |
+| [Upload action](packages/upload-action) | Composite GitHub Action that runs pytest with the plugin; runs on a real GitHub Actions runner in every CI build | the upload itself (stub); Marketplace listing |
 
 The hosted pieces (FastAPI backend, Postgres, GitHub App, AI-written fixes and
 billing) are designed in the [technical guide](docs/technical-guide.md) and not
@@ -189,6 +193,8 @@ The timezone result depends on the time of day the harness runs.
   describes an earlier single-repo plan and doesn't match this repository.
 - [CHANGELOG.md](CHANGELOG.md) and [RELEASING.md](RELEASING.md): the 0.1.0
   release plan.
+- [SECURITY.md](SECURITY.md): how to report a vulnerability, and why the
+  battery should only be run on code you trust.
 
 ## License
 

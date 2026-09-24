@@ -1,7 +1,7 @@
 # nullcase-sandbox
 
 The experiment battery from §3.7 of
-[docs/technical-guide.md](../docs/technical-guide.md): re-run one test many
+[docs/technical-guide.md](https://github.com/Rowan-gne/NullCase/blob/main/docs/technical-guide.md): re-run one test many
 times under controlled perturbations and see which one moves its failure rate.
 
 ## How it works
@@ -51,8 +51,8 @@ and timing failures are not deterministic, so no repro is printed for them.
 uv run nullcase-battery --project path/to/project tests/test_x.py::test_y
 ```
 
-Options: `--baseline-runs N` and `--runs N` (default 20 each), `--only order
-hash_seed …`, `--python PATH` (an interpreter with the project's dependencies
+Options: `--baseline-runs N` and `--runs N` (default 20 each), `--only
+order,hash_seed` (comma-separated), `--python PATH` (an interpreter with the project's dependencies
 plus this package installed), `--json`.
 
 ### Docker

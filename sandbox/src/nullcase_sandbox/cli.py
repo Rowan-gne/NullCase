@@ -16,6 +16,7 @@ from nullcase_sandbox.battery import (
     Target,
     run_battery,
 )
+from nullcase_sandbox.diagnosis import PerturbationName
 from nullcase_sandbox.stats import Rate, differs
 
 
@@ -32,10 +33,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--runs", type=int, default=20, help="runs per perturbation")
     parser.add_argument(
         "--only",
-        nargs="+",
-        choices=ALL_PERTURBATIONS,
+        type=perturbation_list,
         default=list(ALL_PERTURBATIONS),
-        help="run only these perturbations",
+        metavar="NAME[,NAME...]",
+        help=f"comma-separated perturbations to run (from: {', '.join(ALL_PERTURBATIONS)})",
     )
     parser.add_argument("--json", action="store_true", help="print the report as JSON")
     args = parser.parse_args(argv)
@@ -54,6 +55,18 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     print(json.dumps(report_to_dict(report), indent=2) if args.json else format_report(report))
     return 0
+
+
+def perturbation_list(value: str) -> list[PerturbationName]:
+    """Parse ``"order,hash_seed"``; a single token keeps a trailing node ID positional."""
+    names = [name.strip() for name in value.split(",") if name.strip()]
+    unknown = [name for name in names if name not in ALL_PERTURBATIONS]
+    if not names or unknown:
+        raise argparse.ArgumentTypeError(
+            f"unknown perturbation(s): {', '.join(unknown) or value!r};"
+            f" choose from {', '.join(ALL_PERTURBATIONS)}"
+        )
+    return [name for name in ALL_PERTURBATIONS if name in names]
 
 
 def _row(name: str, rate: Rate, note: str) -> str:

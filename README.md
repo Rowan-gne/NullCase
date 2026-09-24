@@ -19,7 +19,7 @@ does not apply here.
 | Component | Path | Implemented | Not yet |
 |---|---|---|---|
 | pytest plugin | [packages/pytest-plugin](packages/pytest-plugin) | per-test outcome, duration, file path and node ID written to a local JSON Lines file | upload to a backend (OIDC), quarantine list (stub returns empty), CI metadata |
-| Experiment battery | [sandbox](sandbox) | baseline, order, hash-seed, network-off, timezone and parallel perturbations; Wilson-interval diagnosis; confirmed repro commands; single-test coverage check for target lines (`nullcase-coverage`); CLIs; Dockerfile | running on Fly Machines; coverage check not yet part of an acceptance gate |
+| Experiment battery | [sandbox](sandbox) | baseline, order, hash-seed, network-off, timezone and parallel perturbations; Wilson-interval diagnosis with a deterministic-flip check; confirmed repro commands; single-test coverage check for target lines (`nullcase-coverage`); CLIs; Dockerfile | running on Fly Machines; coverage check not yet part of an acceptance gate |
 | Evaluation harness | [eval](eval) | demo repo with six seeded flaky tests; harness that scores the battery against their labels | a published external flaky-test dataset |
 | Upload GitHub Action | [packages/upload-action](packages/upload-action) | composite action that installs the plugin and runs pytest with local results | the upload itself (stub prints a TODO notice); not yet run on a real Actions runner |
 | Example-test retrieval | [packages/retrieval](packages/retrieval) | `ast` import graph; tests that import a target module, ranked by name/path similarity | embedding fallback (stub raises `NotImplementedError`) |
@@ -66,24 +66,30 @@ it needs internet access.
 
 ## Eval results
 
-**5 of 6 seeded tests diagnosed correctly**, in each of two full runs on
-2026-09-24 (macOS, Python 3.12, 20 baseline runs and 20 runs per perturbation).
+**Current: 6 of 6 seeded tests diagnosed correctly**, in each of two full runs
+on 2026-09-24 (macOS, Python 3.12, 20 baseline runs and 20 runs per
+perturbation).
 
-| Seeded test | Label | Predicted | Repro printed |
-|---|---|---|---|
-| `test_first_user_gets_id_1` | order_dependent | order_dependent | yes |
-| `test_unique_tags_keeps_first_seen_order` | hash_order | **fails_consistently** (miss) | yes (the pinned baseline command) |
-| `test_example_dot_com_is_up` | network | network | yes |
-| `test_invoice_is_dated_today` | timezone | timezone | yes |
-| `test_export_report[acme]` | concurrency | concurrency | no (not deterministic) |
-| `test_cache_warmup_finishes_quickly` | timing | timing | no (not deterministic) |
+| Seeded test | Label | Predicted | Decided by | Repro printed |
+|---|---|---|---|---|
+| `test_first_user_gets_id_1` | order_dependent | order_dependent | Wilson interval | yes |
+| `test_unique_tags_keeps_first_seen_order` | hash_order | hash_order | deterministic flip | yes (the pinned baseline command) |
+| `test_example_dot_com_is_up` | network | network | Wilson interval | yes |
+| `test_invoice_is_dated_today` | timezone | timezone | Wilson interval | yes |
+| `test_export_report[acme]` | concurrency | concurrency | Wilson interval | no (not deterministic) |
+| `test_cache_warmup_finishes_quickly` | timing | timing | baseline only | no (not deterministic) |
 
-**Why the hash-order test is missed:** the baseline pins `PYTHONHASHSEED=0`,
-and under that seed this test fails every run (20/20). Varying the seed
-brought failures down to 15/20, but the two 95% Wilson intervals overlap
-([0.84, 1.00] vs [0.53, 0.89]), so the rule doesn't count it as a change.
-This is a known weakness of the rate-comparison rule when the pinned setting
-happens to be a failing one.
+**This score is not independent of the method.** The first version of the
+battery scored **5 of 6** (two runs, same settings). It missed the
+hash-order test and reported `fails_consistently`: with the baseline pinned
+at `PYTHONHASHSEED=0` the test failed 20/20, varying the seed brought it to
+15/20, and the two 95% Wilson intervals overlap ([0.84, 1.00] vs
+[0.53, 0.89]). The deterministic-flip check (see
+[sandbox/README.md](sandbox/README.md)) was then added specifically to handle
+that pattern: replaying `PYTHONHASHSEED=1` passed every time while the pinned
+seed failed every time. Because the fix was designed after seeing the miss,
+6/6 shows the fix works on the case it targets. It isn't fresh evidence of
+accuracy. The other five tests are still decided exactly as before.
 
 **Limits of this number:** six hand-written tests, one per category, labelled
 by the same author who wrote the battery. It checks that each perturbation

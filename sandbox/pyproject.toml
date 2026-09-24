@@ -1,13 +1,28 @@
 [project]
 name = "nullcase-sandbox"
-version = "0.0.0"
+version = "0.1.0"
 description = "Experiment battery that diagnoses why a flaky pytest test fails"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Rowan-gne" }]
+keywords = ["pytest", "flaky tests", "diagnosis"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+]
 dependencies = [
     "coverage>=7.16",
-    "nullcase-pytest",
+    "nullcase-pytest>=0.1.0",
     "pytest>=8.0",
     "pytest-randomly>=5.0",
     "pytest-socket>=0.8",
@@ -20,6 +35,12 @@ nullcase-coverage = "nullcase_sandbox.coverage_cli:main"
 
 [tool.uv.sources]
 nullcase-pytest = { workspace = true }
+
+[project.urls]
+Homepage = "https://github.com/Rowan-gne/NullCase"
+Repository = "https://github.com/Rowan-gne/NullCase"
+Issues = "https://github.com/Rowan-gne/NullCase/issues"
+Documentation = "https://github.com/Rowan-gne/NullCase/blob/main/docs/technical-guide.md"
 
 [build-system]
 requires = ["hatchling"]

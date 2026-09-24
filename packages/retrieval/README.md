@@ -2,7 +2,7 @@
 
 Finds existing tests to use as style examples for a target module or function:
 the import-graph half of §3.9 in
-[docs/technical-guide.md](../../docs/technical-guide.md). Local only; it reads
+[docs/technical-guide.md](https://github.com/Rowan-gne/NullCase/blob/main/docs/technical-guide.md). Local only; it reads
 the repository's files and needs no backend.
 
 ```python

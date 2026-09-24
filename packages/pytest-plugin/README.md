@@ -1,7 +1,7 @@
 # nullcase-pytest
 
 pytest plugin that records one result per test. Design: §3.5 of
-[docs/technical-guide.md](../../docs/technical-guide.md).
+[docs/technical-guide.md](https://github.com/Rowan-gne/NullCase/blob/main/docs/technical-guide.md).
 
 ## Usage
 

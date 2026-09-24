@@ -5,6 +5,7 @@ requires-python = ">=3.11"
 [manifest]
 members = [
     "nullcase-pytest",
+    "nullcase-retrieval",
     "nullcase-sandbox",
     "nullcase-workspace",
 ]
@@ -145,6 +146,11 @@ dependencies = [
 requires-dist = [{ name = "pytest", specifier = ">=8.0" }]
 
 [[package]]
+name = "nullcase-retrieval"
+version = "0.0.0"
+source = { editable = "packages/retrieval" }
+
+[[package]]
 name = "nullcase-sandbox"
 version = "0.0.0"
 source = { editable = "sandbox" }
@@ -171,6 +177,7 @@ version = "0.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "nullcase-pytest" },
+    { name = "nullcase-retrieval" },
     { name = "nullcase-sandbox" },
 ]
 
@@ -186,6 +193,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "nullcase-pytest", editable = "packages/pytest-plugin" },
+    { name = "nullcase-retrieval", editable = "packages/retrieval" },
     { name = "nullcase-sandbox", editable = "sandbox" },
 ]
 

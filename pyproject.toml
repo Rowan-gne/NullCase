@@ -3,7 +3,7 @@ name = "nullcase-workspace"
 version = "0.0.0"
 description = "Workspace root for the NullCase open-core packages"
 requires-python = ">=3.11"
-dependencies = ["nullcase-pytest", "nullcase-sandbox"]
+dependencies = ["nullcase-pytest", "nullcase-retrieval", "nullcase-sandbox"]
 
 [dependency-groups]
 dev = [
@@ -19,10 +19,11 @@ package = false
 
 [tool.uv.sources]
 nullcase-pytest = { workspace = true }
+nullcase-retrieval = { workspace = true }
 nullcase-sandbox = { workspace = true }
 
 [tool.uv.workspace]
-members = ["packages/*", "sandbox"]
+members = ["packages/pytest-plugin", "packages/retrieval", "sandbox"]
 
 [tool.ruff]
 line-length = 100

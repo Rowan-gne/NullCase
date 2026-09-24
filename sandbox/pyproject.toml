@@ -1,0 +1,24 @@
+[project]
+name = "nullcase-sandbox"
+version = "0.0.0"
+description = "Experiment battery that diagnoses why a flaky pytest test fails"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+    "nullcase-pytest",
+    "pytest>=8.0",
+    "pytest-randomly>=5.0",
+    "pytest-socket>=0.8",
+    "pytest-xdist>=3.8",
+]
+
+[project.scripts]
+nullcase-battery = "nullcase_sandbox.cli:main"
+
+[tool.uv.sources]
+nullcase-pytest = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

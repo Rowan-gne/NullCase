@@ -1,0 +1,5 @@
+# Stand-alone demo project: its own pytest rootdir, so node IDs are relative to
+# this directory and the workspace's pytest settings don't apply.
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

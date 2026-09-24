@@ -74,7 +74,14 @@ def format_report(report: BatteryReport) -> str:
     for name, rate in report.perturbations.items():
         note = "differs from baseline" if differs(rate, report.baseline) else ""
         lines.append(_row(name, rate, note))
-    lines += ["", f"diagnosis: {report.diagnosis.category}"]
+    d = report.diagnosis
+    lines += ["", f"diagnosis: {d.category} ({d.method.replace('_', ' ')})"]
+    if d.method == "deterministic_flip":
+        side = "passes" if report.baseline.failures else "fails"
+        lines.append(
+            f"  pinned baseline {'failed' if report.baseline.failures else 'passed'} every run;"
+            f" {d.flip_setting} {side} on every replay"
+        )
     if report.repro:
         r = report.repro
         lines.append(
@@ -96,6 +103,8 @@ def report_to_dict(report: BatteryReport) -> dict[str, Any]:
         "baseline": rate(report.baseline),
         "perturbations": {name: rate(r) for name, r in report.perturbations.items()},
         "category": report.diagnosis.category,
+        "method": report.diagnosis.method,
+        "flip_setting": report.diagnosis.flip_setting,
         "significant": list(report.diagnosis.significant),
         "repro": asdict(report.repro) if report.repro else None,
     }

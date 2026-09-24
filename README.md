@@ -7,7 +7,8 @@ with a command that reproduces the failure when one exists.
 
 **Status: early-stage — these are the public components; the hosted product is
 in private development.** Nothing here is released on PyPI or the GitHub
-Marketplace yet.
+Marketplace yet. Version 0.1.0 is prepared but unpublished; see
+[CHANGELOG.md](CHANGELOG.md) and [RELEASING.md](RELEASING.md).
 
 Full design: [docs/technical-guide.md](docs/technical-guide.md). This repository
 covers the pytest plugin, the experiment battery, the evaluation harness,

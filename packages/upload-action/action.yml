@@ -1,0 +1,40 @@
+name: NullCase test results
+description: Run pytest with the nullcase-pytest plugin and record per-test results.
+author: Rowan-gne
+
+inputs:
+  pytest-args:
+    description: Extra arguments passed to pytest (shell-style quoting).
+    required: false
+    default: ""
+  working-directory:
+    description: Directory to run pytest in.
+    required: false
+    default: "."
+  results-path:
+    description: Where to write the JSON Lines results, relative to working-directory.
+    required: false
+    default: nullcase-results.jsonl
+  plugin-source:
+    description: >-
+      pip requirement for nullcase-pytest. Defaults to the copy bundled with
+      this action, since the plugin is not published to PyPI.
+    required: false
+    default: ""
+
+outputs:
+  results-path:
+    description: Path of the JSON Lines results file.
+    value: ${{ steps.run.outputs.results-path }}
+
+runs:
+  using: composite
+  steps:
+    - id: run
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        NULLCASE_PYTEST_ARGS: ${{ inputs.pytest-args }}
+        NULLCASE_RESULTS_PATH: ${{ inputs.results-path }}
+        NULLCASE_PLUGIN_SOURCE: ${{ inputs.plugin-source || format('{0}/../pytest-plugin', github.action_path) }}
+      run: python "$GITHUB_ACTION_PATH/entrypoint.py"

@@ -1,0 +1,8 @@
+{
+  "tests/test_order.py::test_first_user_gets_id_1": "order_dependent",
+  "tests/test_hash.py::test_unique_tags_keeps_first_seen_order": "hash_order",
+  "tests/test_network.py::test_example_dot_com_is_up": "network",
+  "tests/test_timezone.py::test_invoice_is_dated_today": "timezone",
+  "tests/test_concurrency.py::test_export_report[acme]": "concurrency",
+  "tests/test_timing.py::test_cache_warmup_finishes_quickly": "timing"
+}

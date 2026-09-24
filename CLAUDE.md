@@ -39,5 +39,21 @@ is rules and current status only; it does not repeat that document.
 
 ## Current status
 
-Bootstrapping. No product code yet. See docs/technical-guide.md for the
-full six-week plan; this repo currently covers none of it.
+The public, open-core components exist and run locally. packages/pytest-plugin
+records per-test results to local JSON Lines. sandbox/ holds the experiment
+battery (baseline, order, hash-seed, network-off, timezone and parallel
+perturbations, a Wilson-interval diagnosis, confirmed repro commands, and a
+Dockerfile) plus a single-test coverage check for target lines. The eval
+harness in eval/ scores the battery against six seeded demo tests: 5 of 6
+correct. The hash-order test is missed because the pinned PYTHONHASHSEED=0
+baseline fails every run, so varying the seed doesn't move the rate outside
+the overlapping Wilson intervals. That result and its explanation are
+deliberate; don't tune the method or eval/ to change it. packages/retrieval
+builds a local `ast` import graph and ranks tests that import a target module.
+packages/upload-action wraps the plugin as a composite GitHub Action, but it
+hasn't run on a real Actions runner. Stubbed until a backend exists:
+remote upload (RemoteUploadSink and the action's upload step), the quarantine
+list (always empty), retrieval's pgvector embedding fallback, and any
+AI-generated fixes or tests (there is no LLM layer here). This is the last
+public-repo work before the wall; the backend, GitHub App, billing,
+deployment and dashboard belong in the private repo (rule 6).

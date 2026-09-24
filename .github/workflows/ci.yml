@@ -7,13 +7,19 @@ on:
 permissions:
   contents: read
 
-jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
-      - uses: astral-sh/setup-uv@v10.2.0
+# Third-party actions are pinned to commit SHAs; Dependabot keeps them current.
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
 
@@ -29,5 +35,134 @@ jobs:
       - name: Type check
         run: uv run pyright
 
+      - name: Check versions agree
+        run: uv run python scripts/check_versions.py
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python }}
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Confirm interpreter version
+        env:
+          EXPECTED: ${{ matrix.python }}
+        run: uv run python -c "import os, sys; v = '%d.%d' % sys.version_info[:2]; assert v == os.environ['EXPECTED'], v"
+
+      # Dogfood: record this suite's own results with the nullcase-pytest plugin.
       - name: Test
-        run: uv run pytest
+        run: uv run pytest --nullcase-results=nullcase-results.jsonl
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: nullcase-results-py${{ matrix.python }}
+          path: nullcase-results.jsonl
+          if-no-files-found: ignore
+
+  lowest-deps:
+    name: test (lowest direct dependencies)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          python-version: "3.11"
+
+      # Installs the oldest versions the packages declare they support
+      # (e.g. pytest 8.0), non-editable, and runs the suite against them.
+      - name: Install lowest direct dependencies
+        run: |
+          uv venv .venv-lowest
+          VIRTUAL_ENV=.venv-lowest uv pip install --resolution lowest-direct \
+            ./packages/pytest-plugin ./packages/retrieval ./sandbox "hypothesis>=6.168"
+
+      - name: Test
+        run: .venv-lowest/bin/python -m pytest
+
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Build
+        run: |
+          for package in nullcase-pytest nullcase-retrieval nullcase-sandbox; do
+            uv build --package "$package" --out-dir dist
+          done
+
+      - name: Check distributions
+        run: uvx twine check --strict dist/*
+
+      - name: Install wheels in a clean virtualenv and smoke-test them
+        run: python scripts/smoke_test_dist.py dist
+
+  action:
+    name: upload-action on a real runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Install pytest
+        run: python -m pip install pytest
+
+      # Until nullcase-pytest is on PyPI, install the plugin from this checkout.
+      - id: nullcase
+        uses: ./packages/upload-action
+        with:
+          working-directory: packages/upload-action/standalone/self-test
+          pytest-args: "-q"
+          plugin-source: ${{ github.workspace }}/packages/pytest-plugin
+
+      - name: Check results
+        env:
+          RESULTS: ${{ steps.nullcase.outputs.results-path }}
+        run: python packages/upload-action/standalone/self-test/check_results.py "$RESULTS"
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Build image
+        run: docker build -f sandbox/Dockerfile -t nullcase-battery .
+
+      - name: Diagnose a demo test inside the container, without network
+        run: |
+          docker run --rm --network none -v "$PWD/eval/demo-repo:/repo:ro" nullcase-battery \
+            --only order,hash_seed --json tests/test_order.py::test_first_user_gets_id_1 \
+            > report.json
+          python3 - <<'EOF'
+          import json
+          report = json.load(open("report.json"))
+          assert report["category"] == "order_dependent", report
+          assert report["repro"], report
+          print("ok:", report["category"], report["repro"]["setting"])
+          EOF

@@ -5,7 +5,7 @@
 # The target project's own dependencies must also be installed in the image
 # (e.g. a derived image that pip-installs them). With `--network none` the
 # baseline cannot reach the network, so network-dependent tests fail there too.
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 COPY packages/pytest-plugin /src/packages/pytest-plugin
 COPY sandbox /src/sandbox

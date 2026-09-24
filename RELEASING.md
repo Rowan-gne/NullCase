@@ -16,6 +16,13 @@ accounts.
    manual approval step.
 3. **Account security.** 2FA on PyPI and GitHub (Marketplace publishing
    requires it on GitHub).
+4. **Branch protection.** Protect `main` and require the CI checks to pass:
+   `lint`, `test (3.11)` through `test (3.14)`, `test (lowest direct
+   dependencies)`, `package`, `upload-action on a real runner` and `docker`.
+5. **Private vulnerability reporting.** Turn it on under Settings → Code
+   security. [SECURITY.md](SECURITY.md) points reporters there.
+6. **Dependabot.** It's configured in `.github/dependabot.yml`. Review its
+   weekly PRs; CI runs on each one.
 
 ## Releasing the packages
 
@@ -24,8 +31,10 @@ accounts.
    `python3 scripts/check_versions.py`.
 2. Move the `CHANGELOG.md` entry from "unreleased" to the release date.
 3. Optional dry run: run the **Release** workflow manually from the Actions
-   tab. It checks versions, runs the tests, builds, and runs
-   `twine check --strict`, but doesn't publish.
+   tab. It checks versions, runs the tests, builds, runs `twine check
+   --strict` and smoke-tests the wheels, but doesn't publish. Locally:
+   `uv build --package <name> --out-dir dist` for each package, then
+   `python3 scripts/smoke_test_dist.py dist`.
 4. Tag and push: `git tag v0.1.0 && git push origin v0.1.0`. The workflow
    checks that the tag matches every version, repeats the build job, then
    publishes from the `pypi` environment.
@@ -42,7 +51,9 @@ Do this after `nullcase-pytest` is on PyPI: the action installs
    organisation exists).
 2. `python3 scripts/export_upload_action.py ../upload-action-repo OWNER/REPO`
 3. In the new directory: `git init`, commit, push. Its `self-test` workflow
-   is the first run of the action on a real Actions runner. Check that it
+   is the first run of the action from its own repository with the plugin
+   installed from PyPI. This repo's CI already runs the action on a real
+   runner, but with the plugin installed from the checkout. Check that it
    passes.
 4. Create a release `v0.1.0` there and tick **Publish this Action to the
    GitHub Marketplace**. The action name ("NullCase test results") must be

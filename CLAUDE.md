@@ -44,11 +44,13 @@ records per-test results to local JSON Lines. sandbox/ holds the experiment
 battery (baseline, order, hash-seed, network-off, timezone and parallel
 perturbations, a Wilson-interval diagnosis, confirmed repro commands, and a
 Dockerfile) plus a single-test coverage check for target lines. The eval
-harness in eval/ scores the battery against six seeded demo tests: 5 of 6
-correct. The hash-order test is missed because the pinned PYTHONHASHSEED=0
-baseline fails every run, so varying the seed doesn't move the rate outside
-the overlapping Wilson intervals. That result and its explanation are
-deliberate; don't tune the method or eval/ to change it. packages/retrieval
+harness in eval/ scores the battery against six seeded demo tests: 6 of 6
+now, 5 of 6 originally. The hash-order miss (the pinned PYTHONHASHSEED=0
+baseline failed every run and the Wilson intervals overlapped) was fixed on
+the user's explicit instruction by adding a deterministic-flip check. Because
+that fix came after seeing the miss, the README says 6/6 isn't independent
+evidence; keep that caveat, and don't tune the method or eval/ further to
+move the score. packages/retrieval
 builds a local `ast` import graph and ranks tests that import a target module.
 packages/upload-action wraps the plugin as a composite GitHub Action, but it
 hasn't run on a real Actions runner. Stubbed until a backend exists:

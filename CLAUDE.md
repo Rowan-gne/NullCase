@@ -52,8 +52,11 @@ that fix came after seeing the miss, the README says 6/6 isn't independent
 evidence; keep that caveat, and don't tune the method or eval/ further to
 move the score. packages/retrieval
 builds a local `ast` import graph and ranks tests that import a target module.
-packages/upload-action wraps the plugin as a composite GitHub Action, but it
-hasn't run on a real Actions runner. Stubbed until a backend exists:
+packages/upload-action wraps the plugin as a composite GitHub Action. CI runs
+it on a real runner with the plugin from the checkout; its default PyPI plugin
+source is unverified until publishing. CI runs 9 jobs: lint and strict type
+check; tests on Python 3.11–3.14; lowest declared dependency versions; wheel
+build and clean-virtualenv smoke test; the action; the Docker image. Stubbed until a backend exists:
 remote upload (RemoteUploadSink and the action's upload step), the quarantine
 list (always empty), retrieval's pgvector embedding fallback, and any
 AI-generated fixes or tests (there is no LLM layer here). Release prep for 0.1.0

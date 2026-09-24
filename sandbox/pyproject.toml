@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 dependencies = [
+    "coverage>=7.16",
     "nullcase-pytest",
     "pytest>=8.0",
     "pytest-randomly>=5.0",
@@ -15,6 +16,7 @@ dependencies = [
 
 [project.scripts]
 nullcase-battery = "nullcase_sandbox.cli:main"
+nullcase-coverage = "nullcase_sandbox.coverage_cli:main"
 
 [tool.uv.sources]
 nullcase-pytest = { workspace = true }

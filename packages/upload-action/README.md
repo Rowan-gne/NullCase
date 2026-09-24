@@ -1,7 +1,7 @@
 # upload-action
 
 GitHub Action wrapper for `nullcase-pytest` (§3.5 of
-[docs/technical-guide.md](../../docs/technical-guide.md)). It installs the
+[docs/technical-guide.md](https://github.com/Rowan-gne/NullCase/blob/main/docs/technical-guide.md)). It installs the
 plugin, runs pytest with local JSON Lines output, then passes the results to
 `RemoteUploadSink`.
 
@@ -23,6 +23,8 @@ steps:
     uses: Rowan-gne/NullCase/packages/upload-action@main
     with:
       pytest-args: "-q"
+      # Until nullcase-pytest 0.1.0 is on PyPI, point at the plugin in this repo:
+      # plugin-source: git+https://github.com/Rowan-gne/NullCase#subdirectory=packages/pytest-plugin
   - uses: actions/upload-artifact@v7
     if: always()
     with:
@@ -35,16 +37,26 @@ steps:
 | `pytest-args` | `""` | extra pytest arguments, shell-style quoting |
 | `working-directory` | `.` | where pytest runs |
 | `results-path` | `nullcase-results.jsonl` | relative to `working-directory` |
-| `plugin-source` | the plugin bundled in this repo | pip requirement for `nullcase-pytest` |
+| `plugin-source` | `nullcase-pytest==0.1.0` | pip requirement for the plugin (a version, path or URL) |
 
 Output: `results-path` (absolute path of the results file).
 
+## Stand-alone repository
+
+The Marketplace requires `action.yml` at the root of its own public repository
+(§11.2). `scripts/export_upload_action.py DEST OWNER/REPO` assembles that
+layout from this directory and `standalone/`. It adds a Marketplace README and
+a `self-test` workflow that runs the action on a real runner against a small
+fixture suite. See [RELEASING.md](https://github.com/Rowan-gne/NullCase/blob/main/RELEASING.md).
+
 ## Verification status
 
-- `entrypoint.py` has been run standalone in a fresh virtualenv against a
-  sample project. It installed the plugin, wrote correct results and exited
-  with pytest's code. Its tests are in `tests/`.
-- `action.yml` passes actionlint, checked by linting a workflow that uses it.
-- **Not verified on a real Actions runner.**
-- Not publishable to the Marketplace from here: that requires `action.yml` at
-  the root of its own public repository (§11.2).
+- `entrypoint.py` has been run standalone in fresh virtualenvs against sample
+  projects. It installed the plugin, wrote correct results and exited with
+  pytest's code. Its tests are in `tests/`.
+- The exported repository's self-test flow has been run locally, with the
+  plugin installed from the built 0.1.0 wheel in place of PyPI.
+- `action.yml` and the self-test workflow pass actionlint.
+- **Not verified on a real Actions runner.** The exported repo's `self-test`
+  workflow will be the first real run, and it needs `nullcase-pytest==0.1.0`
+  on PyPI first.

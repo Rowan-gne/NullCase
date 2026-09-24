@@ -1,6 +1,9 @@
 name: NullCase test results
 description: Run pytest with the nullcase-pytest plugin and record per-test results.
 author: Rowan-gne
+branding:
+  icon: check-circle
+  color: green
 
 inputs:
   pytest-args:
@@ -16,11 +19,9 @@ inputs:
     required: false
     default: nullcase-results.jsonl
   plugin-source:
-    description: >-
-      pip requirement for nullcase-pytest. Defaults to the copy bundled with
-      this action, since the plugin is not published to PyPI.
+    description: pip requirement for nullcase-pytest (a version, path or URL).
     required: false
-    default: ""
+    default: nullcase-pytest==0.1.0
 
 outputs:
   results-path:
@@ -36,5 +37,5 @@ runs:
       env:
         NULLCASE_PYTEST_ARGS: ${{ inputs.pytest-args }}
         NULLCASE_RESULTS_PATH: ${{ inputs.results-path }}
-        NULLCASE_PLUGIN_SOURCE: ${{ inputs.plugin-source || format('{0}/../pytest-plugin', github.action_path) }}
+        NULLCASE_PLUGIN_SOURCE: ${{ inputs.plugin-source }}
       run: python "$GITHUB_ACTION_PATH/entrypoint.py"

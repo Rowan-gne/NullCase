@@ -59,7 +59,9 @@ class ResultRecorder:
         self.quarantined = fetch_quarantine_list()
 
     def pytest_runtest_logreport(self, report: pytest.TestReport) -> None:
-        state = self._in_progress.setdefault(report.nodeid, _InProgress(report.location[0]))
+        # location[0] uses the OS separator; node IDs always use "/".
+        file_path = Path(report.location[0]).as_posix()
+        state = self._in_progress.setdefault(report.nodeid, _InProgress(file_path))
         state.duration_s += report.duration
         state.outcome = _merge(state.outcome, phase_outcome(report))
         if report.when == "teardown":

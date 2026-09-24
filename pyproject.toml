@@ -32,12 +32,14 @@ target-version = "py311"
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
 
 [tool.pyright]
-include = ["packages", "sandbox"]
+include = ["packages", "sandbox", "eval/harness"]
+extraPaths = ["eval/harness"]
 pythonVersion = "3.11"
 typeCheckingMode = "strict"
 venvPath = "."
 venv = ".venv"
 
 [tool.pytest.ini_options]
-testpaths = ["packages", "sandbox"]
+testpaths = ["packages", "sandbox", "eval/harness"]
+pythonpath = ["eval/harness"]
 addopts = ["-p", "pytester", "--import-mode=importlib"]

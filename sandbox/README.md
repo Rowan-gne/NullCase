@@ -53,6 +53,21 @@ docker run --rm --network none -v "$PWD/path/to/project:/repo:ro" \
 The image has only the battery and its pytest plugins; a project with its own
 dependencies needs a derived image that installs them.
 
+## Coverage check
+
+The last row of the §3.7 table: does one test actually execute given lines of
+a file? It runs the test alone under coverage.py, measuring only that file.
+
+```bash
+uv run nullcase-coverage --project eval/demo-repo \
+  tests/test_order.py::test_first_user_gets_id_1 src/demo_service/registry.py 2,8-9,13
+```
+
+This prints the requested lines as covered, not covered, or not executable
+(blank lines, comments). It exits 0 only if every executable requested line
+was covered. It isn't yet wired into the battery's acceptance rule, because
+nothing generates tests yet.
+
 ## Limitations
 
 - With the baseline pinned at `PYTHONHASHSEED=0`, a hash-order test that

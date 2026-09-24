@@ -3,7 +3,14 @@ from typing import get_args
 
 from hypothesis import given
 from hypothesis import strategies as st
-from nullcase_sandbox.diagnosis import CATEGORY_FOR, PerturbationName, diagnose
+from nullcase_sandbox.diagnosis import (
+    CATEGORY_FOR,
+    PerturbationName,
+    diagnose,
+    flip_eligible,
+    flipped,
+    is_confirmed_flip,
+)
 from nullcase_sandbox.stats import Rate, differs
 
 NAMES: tuple[PerturbationName, ...] = get_args(PerturbationName)
@@ -67,3 +74,34 @@ def test_order_shuffle_that_raises_failures_is_order_dependent() -> None:
     result = diagnose(Rate(0, 20), {"order": Rate(11, 20), "hash_seed": Rate(1, 20)})
     assert result.category == "order_dependent"
     assert result.significant == ("order",)
+
+
+@given(rates(), st.integers(min_value=1, max_value=10), st.data())
+def test_flip_requires_a_constant_baseline_and_unanimous_opposite_replays(
+    baseline: Rate, replay_runs: int, data: st.DataObject
+) -> None:
+    replay_failures = data.draw(st.integers(min_value=0, max_value=replay_runs))
+    confirmed = is_confirmed_flip(baseline, replay_failures, replay_runs)
+    if 0 < baseline.failures < baseline.runs:
+        assert not confirmed
+    elif baseline.failures == 0:
+        assert confirmed == (replay_failures == replay_runs)
+    else:
+        assert confirmed == (replay_failures == 0)
+
+
+@given(rates(), perturbation_maps)
+def test_flip_check_only_applies_when_wilson_found_nothing_and_baseline_is_constant(
+    baseline: Rate, perturbations: dict[PerturbationName, Rate]
+) -> None:
+    result = diagnose(baseline, perturbations)
+    constant = baseline.failures in (0, baseline.runs)
+    assert flip_eligible(result) == (not result.significant and constant)
+
+
+def test_hash_order_miss_pattern_is_not_significant_by_interval() -> None:
+    # The demo repo's hash-order numbers: interval rule alone can't separate them.
+    result = diagnose(Rate(20, 20), {"hash_seed": Rate(15, 20)})
+    assert result.category == "fails_consistently"
+    assert flip_eligible(result)
+    assert flipped("hash_seed", "PYTHONHASHSEED=7").category == "hash_order"

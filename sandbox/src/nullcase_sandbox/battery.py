@@ -19,7 +19,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import get_args
 
-from nullcase_sandbox.diagnosis import Diagnosis, PerturbationName, diagnose
+from nullcase_sandbox.diagnosis import (
+    Diagnosis,
+    PerturbationName,
+    diagnose,
+    flip_eligible,
+    flipped,
+    is_confirmed_flip,
+)
 from nullcase_sandbox.stats import Rate
 
 PINNED_ENV: Mapping[str, str] = {"PYTHONHASHSEED": "0", "TZ": "UTC"}
@@ -188,29 +195,75 @@ def run_battery(
         )
     baseline = Rate(sum(map(_failed, baseline_outcomes)), len(baseline_outcomes))
 
-    failing_specs: dict[PerturbationName, list[RunSpec]] = {}
+    outcomes: dict[PerturbationName, list[tuple[RunSpec, bool]]] = {}
     rates: dict[PerturbationName, Rate] = {}
     for name, specs in perturbation_specs.items():
         progress(name)
-        failed = [_failed(run_once(target, spec, timeout_s)) for spec in specs]
-        rates[name] = Rate(sum(failed), len(failed))
-        failing_specs[name] = [spec for spec, f in zip(specs, failed, strict=True) if f]
+        outcomes[name] = [(spec, _failed(run_once(target, spec, timeout_s))) for spec in specs]
+        rates[name] = Rate(sum(f for _, f in outcomes[name]), len(specs))
+
+    def replay_failures(spec: RunSpec) -> int:
+        progress(f"confirming {spec.setting}")
+        return sum(_failed(run_once(target, spec, timeout_s)) for _ in range(confirm_runs))
 
     diagnosis = diagnose(baseline, rates)
-    candidates: list[RunSpec] = []
-    if diagnosis.significant and diagnosis.significant[0] in DETERMINISTIC:
-        candidates = _distinct_settings(failing_specs[diagnosis.significant[0]])[:3]
-    elif diagnosis.category == "fails_consistently":
-        candidates = baseline_specs[:1]
-
     repro = None
-    for spec in candidates:
-        progress(f"confirming {spec.setting}")
-        confirmed = sum(_failed(run_once(target, spec, timeout_s)) for _ in range(confirm_runs))
-        if confirmed == confirm_runs:
-            repro = Repro(repro_command(target, spec), spec.setting, confirmed, confirm_runs)
-            break
+    if flip_eligible(diagnosis):
+        diagnosis, repro = _deterministic_flip(
+            target, baseline, outcomes, diagnosis, replay_failures, confirm_runs
+        )
+    if repro is None:
+        candidates: list[RunSpec] = []
+        if diagnosis.significant and diagnosis.significant[0] in DETERMINISTIC:
+            failing = [spec for spec, f in outcomes[diagnosis.significant[0]] if f]
+            candidates = _distinct_settings(failing)[:3]
+        elif diagnosis.category == "fails_consistently" or (
+            diagnosis.method == "deterministic_flip" and baseline.failures == baseline.runs
+        ):
+            candidates = baseline_specs[:1]
+        for spec in candidates:
+            confirmed = replay_failures(spec)
+            if confirmed == confirm_runs:
+                repro = Repro(repro_command(target, spec), spec.setting, confirmed, confirm_runs)
+                break
     return BatteryReport(target, baseline, rates, diagnosis, repro)
+
+
+def _deterministic_flip(
+    target: Target,
+    baseline: Rate,
+    outcomes: dict[PerturbationName, list[tuple[RunSpec, bool]]],
+    diagnosis: Diagnosis,
+    replay_failures: Callable[[RunSpec], int],
+    confirm_runs: int,
+) -> tuple[Diagnosis, Repro | None]:
+    """Look for a deterministic setting that flips a constant baseline's outcome.
+
+    Perturbations with the most opposite outcomes are tried first; up to three
+    distinct flipping settings each are replayed ``confirm_runs`` times.
+    """
+    opposite = baseline.failures == 0  # the "failed" value that counts as a flip
+    flips: dict[PerturbationName, list[RunSpec]] = {
+        name: _distinct_settings([spec for spec, f in runs if f == opposite])
+        for name, runs in outcomes.items()
+        if name in DETERMINISTIC
+    }
+
+    def most_flips_first(name: PerturbationName) -> tuple[int, str]:
+        return (-len(flips[name]), name)
+
+    for name in sorted(flips, key=most_flips_first):
+        for spec in flips[name][:3]:
+            if is_confirmed_flip(baseline, replay_failures(spec), confirm_runs):
+                # The failing side is deterministic: the flip setting if the
+                # baseline passes, otherwise the pinned baseline (confirmed below).
+                repro = (
+                    Repro(repro_command(target, spec), spec.setting, confirm_runs, confirm_runs)
+                    if opposite
+                    else None
+                )
+                return flipped(name, spec.setting), repro
+    return diagnosis, None
 
 
 def _distinct_settings(specs: list[RunSpec]) -> list[RunSpec]:

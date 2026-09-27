@@ -46,3 +46,9 @@ pythonpath = ["eval/harness"]
 # pytest defaults, plus the upload action's stand-alone self-test fixture.
 norecursedirs = [".*", "*.egg", "_darcs", "build", "CVS", "dist", "node_modules", "venv", "{arch}", "standalone"]
 addopts = ["-p", "pytester", "--import-mode=importlib"]
+
+[tool.coverage.run]
+branch = true
+# Measure code the tests run in child processes (battery runs, entrypoint, CLIs).
+patch = ["subprocess"]
+source = ["nullcase_pytest", "nullcase_sandbox", "nullcase_retrieval"]

@@ -1,28 +1,19 @@
 # NullCase
 
 [![CI](https://github.com/Rowan-gne/NullCase/actions/workflows/ci.yml/badge.svg)](https://github.com/Rowan-gne/NullCase/actions/workflows/ci.yml)
-![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)
+![Python 3.11–3.14](https://img.shields.io/badge/python-3.11%E2%80%933.14-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 **Finds out *why* a flaky pytest test is flaky, by controlled experiment.**
 
-A flaky test passes and fails on the same code. The usual fix is to re-run
-it or skip it. NullCase re-runs the test many times, changes one factor at
-a time, and uses statistics to report which factor changes the failure rate.
-When it can, it also prints a command that reproduces the failure every time.
-
-> **Status:** early-stage, runs locally. This repo holds the open-source
-> parts. The hosted service is in private development. Nothing is published
-> to PyPI or the GitHub Marketplace yet.
-
-## Example output
-
-A real run on one of the demo tests (Windows 11, 2026-09-24). Absolute paths
-are shortened to `<demo-repo>` and `<python>`, and the repro command is
-wrapped to fit a phone screen:
+Most flaky-test tools stop at "this test sometimes fails." NullCase re-runs the
+test under controlled conditions, changing one factor at a time: test order,
+hash seed, network access, timezone and parallelism. It then uses a
+statistical test to decide which factor changes the failure rate, and prints a
+command that reproduces the failure on demand.
 
 ```text
-target: tests/test_order.py::test_first_user_gets_id_1
+$ nullcase-battery --project eval/demo-repo tests/test_order.py::test_first_user_gets_id_1
 
               runs  fails   rate  95% Wilson CI
 baseline        20      0   0.00  [0.00, 0.16]
@@ -34,165 +25,176 @@ parallel        20      0   0.00  [0.00, 0.16]
 
 diagnosis: order_dependent (wilson interval)
 repro (--randomly-seed=3626764237, failed 3/3 replays):
-  cd <demo-repo> && PYTHONHASHSEED=0 TZ=UTC \
-    <python> -m pytest -p no:cacheprovider -q \
-    --randomly-seed=3626764237 tests/test_order.py
+  cd eval/demo-repo && PYTHONHASHSEED=0 TZ=UTC python -m pytest -p no:cacheprovider -q --randomly-seed=3626764237 tests/test_order.py
 ```
 
-The test passes on its own every time, fails 16 of 20 times when test order
-is shuffled, and is otherwise unaffected. So the diagnosis is: it depends on
-another test running first.
+*Real output from this repository. Only the absolute paths in the last line
+are shortened.*
+
+> **Status: early-stage.** This repo holds the public, open-source components,
+> and all of them run locally. The hosted service (API, GitHub App, dashboard,
+> billing) is designed in [docs/technical-guide.md](docs/technical-guide.md) but
+> **not deployed**. Version 0.1.0 is prepared but not yet published to PyPI.
+
+## Local metrics
+
+Measured on 2026-09-24 on an Apple M3 laptop (macOS 14.6, Python 3.12.7) unless
+stated otherwise. Every number can be reproduced with the commands in
+[Reproduce the numbers](#reproduce-the-numbers).
+
+| Metric | Result |
+|---|---|
+| Test suite | **68 tests, all passing in 3 of 3 consecutive runs** (48.4 s, 48.3 s, 46.8 s) |
+| Branch coverage | **96%** overall, including code the tests run in child processes. Plugin 100%; retrieval 96–100%; battery, diagnosis and CLIs 92–100% |
+| Property-based tests | 11 [Hypothesis](https://hypothesis.readthedocs.io/) properties covering the statistics and diagnosis rules |
+| Type checking | pyright **strict** mode, 0 errors |
+| CI (GitHub Actions) | 9 jobs, about 105 s per run: lint and strict type check; tests on Python 3.11, 3.12, 3.13 and 3.14; tests against the lowest declared dependency versions; wheel build plus clean-virtualenv smoke test; the GitHub Action on a real runner; the Docker image. Green on every push since the first. |
+| Diagnosis eval | **6 of 6** seeded flaky tests diagnosed correctly, in 3 of 3 full runs (first version: 5 of 6; see [Eval results](#eval-results)) |
+| Full eval run time | 204 s for all six tests (120 isolated pytest runs per test, plus confirmation replays) |
+| One battery run | about 31 s for one test at default settings (20 baseline runs plus 20 runs for each of 5 perturbations) |
+| Code size | about 930 lines of product code, 680 lines of tests (non-blank, non-comment) |
 
 ## How it works
 
-1. **Baseline.** Run the test 20 times with everything pinned: fixed order,
-   fixed hash seed, UTC, network on, one process.
-2. **Perturb.** Run it 20 more times per factor, changing only that factor:
-   test order, `PYTHONHASHSEED`, network off, timezone, parallel workers.
-3. **Compare.** Compute a 95% Wilson score interval for each failure rate.
-   A factor matters if its interval doesn't overlap the baseline's.
-4. **Confirm.** Replay the failing setting 3 times. Print a repro command
-   only if it fails all 3.
+```mermaid
+flowchart LR
+    T[flaky test] --> B[baseline: 20 runs,<br/>every factor pinned]
+    T --> P[5 perturbations × 20 runs,<br/>one factor varied each]
+    B --> W{95% Wilson intervals<br/>overlap?}
+    P --> W
+    W -- no --> C[category = largest effect]
+    W -- yes, baseline constant --> F{replay a flipping<br/>setting 3×}
+    W -- yes, baseline varies --> N
+    F -- flips every time --> C
+    F -- no --> N[timing / fails consistently /<br/>not reproduced]
+    C --> R[confirmed repro command]
+```
 
-Each run is a fresh `pytest` subprocess. Outcomes are read back through the
-project's own pytest plugin.
-
-<details>
-<summary>Edge case: the deterministic-flip check</summary>
-
-Some factors act like a switch: the test fails for one hash seed and passes
-for another, every time. If the pinned baseline happens to sit on the
-failing side, 20/20 vs 15/20 isn't separable by intervals at 20 runs. When
-the baseline never varied and no factor is significant, the battery replays
-each setting that produced the opposite outcome 3 times; if every replay
-flips, that factor is reported. Details in
-[sandbox/README.md](sandbox/README.md).
-
-</details>
-
-## Results on the demo suite
-
-**6 of 6** seeded flaky tests diagnosed correctly, in two full runs on
-2026-09-24 (macOS, Python 3.12, 20 runs per condition).
-
-| Seeded test is flaky because of | Diagnosed |
-|---|---|
-| test order | ✅ |
-| hash seed (set ordering) | ✅ |
-| network access | ✅ |
-| timezone | ✅ |
-| concurrency | ✅ |
-| timing | ✅ |
-
-**Read this number carefully.** The first version scored **5 of 6**: it
-missed the hash-order test. The deterministic-flip check was added *after*
-seeing that miss, so 6/6 shows the fix works on the case it targets. It
-isn't fresh evidence of accuracy. These are six hand-written tests, one per
-category, labelled by the same author who wrote the battery. They check that
-each perturbation works end to end; they don't measure accuracy on
-real-world flaky tests.
-
-<details>
-<summary>Per-test detail</summary>
-
-| Test | Decided by | Repro? |
+| Perturbation | How | Catches |
 |---|---|---|
-| `test_first_user_gets_id_1` | Wilson interval | yes |
-| `test_unique_tags_keeps_first_seen_order` | deterministic flip | yes |
-| `test_example_dot_com_is_up` | Wilson interval | yes |
-| `test_invoice_is_dated_today` | Wilson interval | yes |
-| `test_export_report[acme]` | Wilson interval | no |
-| `test_cache_warmup_finishes_quickly` | baseline only | no |
+| Test order | `pytest-randomly` with spread-out seeds | shared state between tests |
+| Hash seed | varied `PYTHONHASHSEED` | code that relies on `set`/`dict` iteration order |
+| Network off | `pytest-socket --disable-socket` | hidden network calls |
+| Timezone | `TZ` set to UTC+14, UTC+12, UTC−12 and UTC−11 | "today" and date-boundary bugs |
+| Parallel | `pytest-xdist -n 4` | shared files and ports under concurrency |
 
-Concurrency and timing failures aren't deterministic, so no repro command is
-printed for them. In the first version, the hash-order test's pinned seed
-failed 20/20 and varied seeds failed 15/20; the 95% intervals ([0.84, 1.00]
-vs [0.53, 0.89]) overlap, so it was reported as `fails_consistently`. The
-timezone result depends on the time of day the harness runs, and the network
-test needs internet access.
+Every run is a fresh `pytest` subprocess. Results are read back through
+NullCase's own pytest plugin, so the tool uses its own plugin to collect its
+data.
 
-</details>
+## Engineering highlights
 
-## What's in this repo
+- **Statistics instead of guesswork.** A factor counts only when its 95%
+  [Wilson score interval](https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval#Wilson_score_interval)
+  doesn't overlap the baseline's. Hypothesis properties check the interval math
+  (bounds, symmetry, narrowing with more runs) and the diagnosis rule.
+- **Found and fixed a hidden sampling bias.** Consecutive `--randomly-seed`
+  values produced nearly identical test orders: a test that should fail about
+  75% of the time failed only 2 of 10 times. The cause is that pytest-randomly
+  orders tests by `crc32(seed::nodeid)`, and CRC32 is linear. The battery now
+  draws widely spread seeds from a fixed generator, so orders are close to
+  independent and results stay reproducible.
+- **An honest evaluation, including a miss.** The first version scored 5 of 6
+  and the miss was documented rather than hidden. The fix is kept separate from
+  the statistical rule, and the README says plainly that the resulting 6/6 is
+  not independent evidence.
+- **A repro command only when it's confirmed.** A repro is printed only after
+  the failing setting has been replayed and failed 3 of 3 times.
+- **Static analysis with `ast`.** Retrieval builds a repository import graph,
+  resolving relative imports, to find existing tests that are good style
+  examples for a module.
+- **Release engineering.** A tag-triggered release workflow checks that every
+  version matches, runs the tests, builds, runs `twine check --strict`,
+  smoke-tests the wheels in a clean virtualenv, and is set up to publish through
+  PyPI Trusted Publishing, so no API tokens are stored. It hasn't run yet
+  because nothing has been tagged. The same smoke test runs in CI, and it caught
+  a real CLI argument-parsing bug before release.
+- **Supply-chain hygiene.** Every GitHub Action is pinned to a commit SHA, and
+  Dependabot keeps the actions, the uv lockfile and the Docker base image
+  current. `pip-audit` found no known vulnerabilities in the locked
+  dependencies (checked 2026-09-24).
 
-| Component | What it does |
-|---|---|
-| [pytest plugin](packages/pytest-plugin) | Records each test's outcome and duration to JSON Lines |
-| [Experiment battery](sandbox) | The runs, statistics, diagnosis and repro above; CLI and Dockerfile |
-| [Eval harness](eval) | Six seeded flaky tests and a scorer |
-| [Test retrieval](packages/retrieval) | Finds tests that import a given module, via an `ast` import graph |
-| [Upload Action](packages/upload-action) | GitHub Action that runs pytest with the plugin |
+## Components
 
-<details>
-<summary>Not built yet (stubs)</summary>
+| Component | What it does | Not built yet |
+|---|---|---|
+| [pytest plugin](packages/pytest-plugin) | Writes one JSON Lines record per test (outcome, duration, file path, node ID), and works under pytest-xdist | upload to a backend, quarantine list (both stubs) |
+| [Experiment battery](sandbox) | The perturbations, diagnosis and repro commands; a single-test line-coverage check (`nullcase-coverage`); Dockerfile | running on remote sandbox VMs |
+| [Eval harness](eval) | Six seeded flaky tests, one per category, and a harness that scores the battery against their labels | an external, published flaky-test dataset |
+| [Retrieval](packages/retrieval) | Import-graph search for example tests, ranked by name and path similarity | embedding-based fallback (stub) |
+| [Upload action](packages/upload-action) | Composite GitHub Action that runs pytest with the plugin; runs on a real GitHub Actions runner in every CI build | the upload itself (stub); Marketplace listing |
 
-- Uploading results to a backend. The plugin writes local files only; the
-  Action's upload step prints a TODO notice.
-- The quarantine list (always empty).
-- Retrieval's embedding fallback (raises `NotImplementedError`).
-- Running the battery on remote sandbox VMs. It runs locally or in Docker.
-- AI-generated fixes or tests. There is no LLM layer in this repo.
-- The Upload Action hasn't run on a real Actions runner.
+The hosted pieces (FastAPI backend, Postgres, GitHub App, AI-written fixes and
+billing) are designed in the [technical guide](docs/technical-guide.md) and not
+built in this repository.
 
-The full product design (backend, GitHub App, dashboard) is in
-[docs/technical-guide.md](docs/technical-guide.md); only the pieces above
-live here. The file layout in §6.2 of that guide describes an earlier
-single-repo plan and doesn't apply to this repo.
+## Quickstart
 
-</details>
-
-## Engineering
-
-- **Python 3.11+** in a [uv](https://docs.astral.sh/uv/) workspace of
-  three packages.
-- **60 tests**, including property-based tests with Hypothesis for the
-  statistics and diagnosis logic, and pytest's `pytester` for the plugin.
-- **Strict type checking** with pyright, plus ruff lint and format.
-- **CI** runs all of the above on every push
-  ([workflow](.github/workflows/ci.yml)).
-- **Release pipeline** prepared for PyPI Trusted Publishing, not yet used
-  ([RELEASING.md](RELEASING.md), [CHANGELOG.md](CHANGELOG.md)).
-- Wilson intervals are implemented directly
-  ([stats.py](sandbox/src/nullcase_sandbox/stats.py)), no stats library.
-
-## Run it yourself
-
-Needs Python 3.11+ and [uv](https://docs.astral.sh/uv/). Docker is optional.
+Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/). Docker is optional.
 
 ```bash
+git clone https://github.com/Rowan-gne/NullCase.git && cd NullCase
 uv sync
-uv run pytest
+uv run nullcase-battery --project eval/demo-repo tests/test_order.py::test_first_user_gets_id_1
 ```
 
-Diagnose one test (about 2 minutes):
+To run the battery on your own project:
+`uv run nullcase-battery --project path/to/project tests/test_x.py::test_y`.
+The node ID must be relative to that project's pytest rootdir. For options and
+Docker usage, see [sandbox/README.md](sandbox/README.md).
+
+## Reproduce the numbers
 
 ```bash
-uv run nullcase-battery --project eval/demo-repo \
-  tests/test_order.py::test_first_user_gets_id_1
+uv run pytest                                  # test suite
+uv run coverage run -m pytest && uv run coverage combine && uv run coverage report
+uv run pyright                                 # strict type check
+uv run python eval/harness/run_eval.py         # diagnosis eval, about 3–4 minutes
 ```
 
-<details>
-<summary>More usage</summary>
+The eval's network test makes a real HTTP request, so it needs internet
+access. Timings depend on the machine.
 
-The node ID must be relative to the project's pytest rootdir. By default
-the battery runs 20 baseline runs plus 20 runs of each of the five
-perturbations; change this with `--baseline-runs` and `--runs`. For Docker
-usage and details of each perturbation, see
-[sandbox/README.md](sandbox/README.md).
+## Eval results
 
-Score the battery against all six seeded tests (about 3–4 minutes; the
-network test needs internet access):
+**6 of 6 seeded tests diagnosed correctly** in each of three full runs on
+2026-09-24 (20 baseline runs, 20 runs per perturbation).
 
-```bash
-uv run python eval/harness/run_eval.py
-uv run python eval/harness/run_eval.py --out results.json
-```
+| Seeded test | Label | Predicted | Decided by | Repro printed |
+|---|---|---|---|---|
+| `test_first_user_gets_id_1` | order_dependent | order_dependent | Wilson interval | yes |
+| `test_unique_tags_keeps_first_seen_order` | hash_order | hash_order | deterministic flip | yes (the pinned baseline command) |
+| `test_example_dot_com_is_up` | network | network | Wilson interval | yes |
+| `test_invoice_is_dated_today` | timezone | timezone | Wilson interval | yes |
+| `test_export_report[acme]` | concurrency | concurrency | Wilson interval | no (not deterministic) |
+| `test_cache_warmup_finishes_quickly` | timing | timing | baseline only | no (not deterministic) |
 
-It compares each predicted category with the label in
-[eval/harness/labels.json](eval/harness/labels.json) and prints how many
-were diagnosed correctly.
+**This score is not independent of the method.** The first version of the
+battery scored **5 of 6** (two runs, same settings). It missed the
+hash-order test and reported `fails_consistently`: with the baseline pinned
+at `PYTHONHASHSEED=0` the test failed 20/20, varying the seed brought it to
+15/20, and the two 95% Wilson intervals overlap ([0.84, 1.00] vs
+[0.53, 0.89]). The deterministic-flip check (see
+[sandbox/README.md](sandbox/README.md)) was then added specifically to handle
+that pattern: replaying `PYTHONHASHSEED=1` passed every time while the pinned
+seed failed every time. Because the fix was designed after seeing the miss,
+6/6 shows the fix works on the case it targets. It isn't fresh evidence of
+accuracy. The other five tests are still decided exactly as before.
 
-</details>
+**Limits of this number:** six hand-written tests, one per category, labelled
+by the same author who wrote the battery. It checks that each perturbation
+works end to end. It is not a measure of accuracy on real-world flaky tests.
+The timezone result depends on the time of day the harness runs.
+
+## Further reading
+
+- [docs/technical-guide.md](docs/technical-guide.md): full architecture, data
+  model, and design decisions for the complete product. Its §6.2 file layout
+  describes an earlier single-repo plan and doesn't match this repository.
+- [CHANGELOG.md](CHANGELOG.md) and [RELEASING.md](RELEASING.md): the 0.1.0
+  release plan.
+- [SECURITY.md](SECURITY.md): how to report a vulnerability, and why the
+  battery should only be run on code you trust.
 
 ## License
 

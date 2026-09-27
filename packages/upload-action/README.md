@@ -57,6 +57,9 @@ fixture suite. See [RELEASING.md](https://github.com/Rowan-gne/NullCase/blob/mai
 - The exported repository's self-test flow has been run locally, with the
   plugin installed from the built 0.1.0 wheel in place of PyPI.
 - `action.yml` and the self-test workflow pass actionlint.
-- **Not verified on a real Actions runner.** The exported repo's `self-test`
-  workflow will be the first real run, and it needs `nullcase-pytest==0.1.0`
-  on PyPI first.
+- **Runs on a real GitHub Actions runner in this repo's CI** (the `upload-action
+  on a real runner` job), against the self-test fixture, with the plugin
+  installed from the checkout.
+- **Not yet verified:** the default `plugin-source` (installing
+  `nullcase-pytest==0.1.0` from PyPI), because the plugin isn't published yet.
+  The exported repo's `self-test` workflow will be the first run of that path.

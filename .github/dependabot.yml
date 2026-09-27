@@ -1,0 +1,27 @@
+version: 2
+updates:
+  # Workflow and composite-action dependencies (pinned to commit SHAs).
+  - package-ecosystem: github-actions
+    directories:
+      - "/"
+      - "/packages/upload-action"
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Python dependencies in uv.lock.
+  - package-ecosystem: uv
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      python:
+        patterns: ["*"]
+
+  # The battery image's base image.
+  - package-ecosystem: docker
+    directory: "/sandbox"
+    schedule:
+      interval: weekly

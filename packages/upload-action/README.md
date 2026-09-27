@@ -1,62 +1,59 @@
 # upload-action
 
-GitHub Action wrapper for `nullcase-pytest`. It installs the plugin, runs pytest with local JSON Lines output, then passes the results to
-`RemoteUploadSink`.
+The source of the **NullCase flaky test diagnosis** GitHub Action. It installs
+`nullcase-pytest`, runs pytest with local JSON Lines output and passes the
+results to `RemoteUploadSink`. With `diagnose: failed` or `diagnose-tests`, it
+then installs `nullcase-sandbox`, runs the experiment battery on each chosen
+test and writes the diagnosis to the job summary, as file annotations and as
+JSON. The job's exit status is always pytest's.
 
 **Upload is not implemented.** `RemoteUploadSink` is a stub until the hosted
 service exists. The action prints a `::notice::` and leaves the results file on
-the runner. The job's exit status is pytest's.
+the runner.
+
+User-facing documentation (usage, inputs, an example job summary and caveats)
+is the Marketplace README in [standalone/README.md](standalone/README.md).
+Until the packages are on PyPI, point the action at this checkout:
 
 ```yaml
-permissions:
-  contents: read
-steps:
-  - uses: actions/checkout@v7
-  - uses: actions/setup-python@v7
-    with:
-      python-version: "3.12"
-  - run: pip install -r requirements.txt
   - id: nullcase
     uses: Rowan-gne/NullCase/packages/upload-action@main
     with:
-      pytest-args: "-q"
-      # Until nullcase-pytest 0.1.0 is on PyPI, point at the plugin in this repo:
-      # plugin-source: git+https://github.com/Rowan-gne/NullCase#subdirectory=packages/pytest-plugin
-  - uses: actions/upload-artifact@v7
-    if: always()
-    with:
-      name: nullcase-results
-      path: ${{ steps.nullcase.outputs.results-path }}
+      diagnose: failed
+      plugin-source: git+https://github.com/Rowan-gne/NullCase#subdirectory=packages/pytest-plugin
+      sandbox-source: git+https://github.com/Rowan-gne/NullCase#subdirectory=sandbox
 ```
 
-| Input | Default | |
-|---|---|---|
-| `pytest-args` | `""` | extra pytest arguments, shell-style quoting |
-| `working-directory` | `.` | where pytest runs |
-| `results-path` | `nullcase-results.jsonl` | relative to `working-directory` |
-| `plugin-source` | `nullcase-pytest==0.1.0` | pip requirement for the plugin (a version, path or URL) |
+## How it runs
 
-Output: `results-path` (absolute path of the results file).
+`action.yml` runs `entrypoint.py` with the `python` input (default: `python`
+on `PATH`), so everything, including pip installs, uses the interpreter that
+has the project's dependencies. Installs use pip, or `uv pip` when that
+interpreter has no pip. nullcase-sandbox is installed only after the main
+pytest run, with a constraint that keeps the installed pytest version.
 
 ## Stand-alone repository
 
 The Marketplace requires `action.yml` at the root of its own public repository.
-`scripts/export_upload_action.py DEST OWNER/REPO` assembles that
-layout from this directory and `standalone/`. It adds a Marketplace README and
-a `self-test` workflow that runs the action on a real runner against a small
-fixture suite.
+`scripts/export_upload_action.py DEST OWNER/REPO` assembles that layout from
+this directory and `standalone/`: the Marketplace README, and a `self-test`
+workflow that runs the action on Linux, macOS and Windows against two fixture
+suites, installing both packages from PyPI.
 
 ## Verification status
 
-- `entrypoint.py` has been run standalone in fresh virtualenvs against sample
-  projects. It installed the plugin, wrote correct results and exited with
-  pytest's code. Its tests are in `tests/`.
-- The exported repository's self-test flow has been run locally, with the
-  plugin installed from the built 0.1.0 wheel in place of PyPI.
-- `action.yml` and the self-test workflow pass actionlint.
-- **Runs on a real GitHub Actions runner in this repo's CI** (the `upload-action
-  on a real runner` job), against the self-test fixture, with the plugin
-  installed from the checkout.
-- **Not yet verified:** the default `plugin-source` (installing
-  `nullcase-pytest==0.1.0` from PyPI), because the plugin isn't published yet.
-  The exported repo's `self-test` workflow will be the first run of that path.
+- Unit tests cover settings, target selection, summary rendering and
+  annotation escaping; an end-to-end test diagnoses an order-dependent fixture
+  (`tests/`).
+- The exported repository's self-test was rehearsed locally on Windows 11 and
+  on Linux (Docker, Python 3.12) on 2026-09-27: the action's exact `run` line,
+  fresh virtualenvs, both packages installed from the built 0.1.0 wheels. Both
+  steps passed, and the diagnose step reported `order_dependent` with a repro
+  command. On Windows it also passed in a venv without pip, through `uv pip`.
+- `action.yml` and both workflows pass actionlint.
+- This repo's CI runs the action on real Ubuntu, macOS and Windows runners,
+  including a diagnose step, with the packages installed from the checkout.
+  The macOS and Windows jobs are new and haven't run yet.
+- **Not yet verified:** the default PyPI sources, because nothing is published
+  yet. The exported repo's `self-test` workflow will be the first run of that
+  path.

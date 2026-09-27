@@ -50,7 +50,7 @@ stated otherwise. Every number can be reproduced with the commands in
 | Branch coverage | **96%** overall, including code the tests run in child processes. Plugin 100%; retrieval 96–100%; battery, diagnosis and CLIs 92–100% |
 | Property-based tests | 11 [Hypothesis](https://hypothesis.readthedocs.io/) properties covering the statistics and diagnosis rules |
 | Type checking | pyright **strict** mode, 0 errors |
-| CI (GitHub Actions) | 9 jobs, about 105 s per run: lint and strict type check; tests on Python 3.11, 3.12, 3.13 and 3.14; tests against the lowest declared dependency versions; wheel build plus clean-virtualenv smoke test; the GitHub Action on a real runner; the Docker image. Green on every push since the first. |
+| CI (GitHub Actions) | 13 jobs: lint and strict type check; tests on Python 3.11–3.14 on Linux and 3.12 on macOS and Windows; tests against the lowest declared dependency versions; wheel build plus clean-virtualenv smoke test; the GitHub Action, including a diagnosis, on Linux, macOS and Windows runners; the Docker image. The earlier 9-job setup was green on every push; the macOS and Windows jobs were added on 2026-09-27 and haven't run yet. |
 | Diagnosis eval | **6 of 6** seeded flaky tests diagnosed correctly, in 3 of 3 full runs (first version: 5 of 6; see [Eval results](#eval-results)) |
 | Full eval run time | 204 s for all six tests (120 isolated pytest runs per test, plus confirmation replays) |
 | One battery run | about 31 s for one test at default settings (20 baseline runs plus 20 runs for each of 5 perturbations) |
@@ -124,7 +124,7 @@ data.
 | [Experiment battery](sandbox) | The perturbations, diagnosis and repro commands; a single-test line-coverage check (`nullcase-coverage`); Dockerfile | — |
 | [Eval harness](eval) | Six seeded flaky tests, one per category, and a harness that scores the battery against their labels | an external, published flaky-test dataset |
 | [Retrieval](packages/retrieval) | Import-graph search for example tests, ranked by name and path similarity | embedding-based fallback (stub) |
-| [Upload action](packages/upload-action) | Composite GitHub Action that runs pytest with the plugin; runs on a real GitHub Actions runner in every CI build | the upload itself (stub); Marketplace listing |
+| [GitHub Action](packages/upload-action) | Runs pytest with the plugin; in diagnose mode, runs the battery on failing tests and writes the diagnosis to the job summary. CI runs it on Linux, macOS and Windows runners | the upload itself (stub); Marketplace listing |
 
 ## Quickstart
 

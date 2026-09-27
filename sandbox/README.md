@@ -43,6 +43,7 @@ which path decided: `wilson_interval`, `deterministic_flip` or
 **Repro.** For order, hash seed, timezone and network, the battery replays the
 failing setting 3 times and prints the command only if it fails all 3. Parallel
 and timing failures are not deterministic, so no repro is printed for them.
+Repro commands use POSIX shell syntax; on Windows, run them in Git Bash.
 
 ## Usage
 

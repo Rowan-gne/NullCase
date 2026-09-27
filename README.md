@@ -46,15 +46,15 @@ stated otherwise. Every number can be reproduced with the commands in
 
 | Metric | Result |
 |---|---|
-| Test suite | **68 tests, all passing in 3 of 3 consecutive runs** (48.4 s, 48.3 s, 46.8 s) |
-| Branch coverage | **96%** overall, including code the tests run in child processes. Plugin 100%; retrieval 96–100%; battery, diagnosis and CLIs 92–100% |
+| Test suite | **81 tests**, all passing on Windows 11 and on Linux (Docker), Python 3.12, on 2026-09-27. On 2026-09-24, the 68 tests of the time passed in 3 of 3 consecutive runs on the M3 (about 48 s each) |
+| Branch coverage | **96%** overall (re-measured on Linux on 2026-09-27, unchanged), including code the tests run in child processes. Plugin 100%; retrieval 96–100%; battery, diagnosis and CLIs 92–100% |
 | Property-based tests | 11 [Hypothesis](https://hypothesis.readthedocs.io/) properties covering the statistics and diagnosis rules |
 | Type checking | pyright **strict** mode, 0 errors |
 | CI (GitHub Actions) | 13 jobs: lint and strict type check; tests on Python 3.11–3.14 on Linux and 3.12 on macOS and Windows; tests against the lowest declared dependency versions; wheel build plus clean-virtualenv smoke test; the GitHub Action, including a diagnosis, on Linux, macOS and Windows runners; the Docker image. The earlier 9-job setup was green on every push; the macOS and Windows jobs were added on 2026-09-27 and haven't run yet. |
-| Diagnosis eval | **6 of 6** seeded flaky tests diagnosed correctly, in 3 of 3 full runs (first version: 5 of 6; see [Eval results](#eval-results)) |
+| Diagnosis eval | **6 of 6** seeded flaky tests diagnosed correctly, in 3 of 3 full runs, and again in one run each on Linux and Windows 11 on 2026-09-27 after the Windows timezone fix (first version: 5 of 6; see [Eval results](#eval-results)) |
 | Full eval run time | 204 s for all six tests (120 isolated pytest runs per test, plus confirmation replays) |
 | One battery run | about 31 s for one test at default settings (20 baseline runs plus 20 runs for each of 5 perturbations) |
-| Code size | about 930 lines of product code, 680 lines of tests (non-blank, non-comment) |
+| Code size | about 1,160 lines of product code, 820 lines of tests (non-blank, non-comment; 2026-09-27) |
 
 ## How it works
 

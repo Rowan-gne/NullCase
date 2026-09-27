@@ -33,8 +33,10 @@ PINNED_ENV: Mapping[str, str] = {"PYTHONHASHSEED": "0", "TZ": "UTC"}
 COMMON_ARGS: tuple[str, ...] = ("-p", "no:cacheprovider", "-q")
 NO_SHUFFLE: tuple[str, ...] = ("-p", "no:randomly")
 # Extreme UTC offsets: at any time of day at least two of these are on a
-# different calendar date from UTC. (Etc/GMT signs are inverted: GMT-14 is UTC+14.)
-TIMEZONES: tuple[str, ...] = ("Etc/GMT-14", "Etc/GMT-12", "Etc/GMT+12", "Etc/GMT+11")
+# different calendar date from UTC. POSIX TZ strings, whose signs are inverted:
+# AAA-14 is UTC+14. Windows' C runtime ignores IANA names such as Etc/GMT-14,
+# but reads this form the same way Linux and macOS do.
+TIMEZONES: tuple[str, ...] = ("AAA-14", "BBB-12", "CCC+12", "DDD+11")
 PARALLEL_WORKERS = 4
 # pytest-randomly orders tests by crc32(f"{seed}::{nodeid}"). CRC32 is linear,
 # so consecutive seeds give correlated orders; spread seeds sample far more

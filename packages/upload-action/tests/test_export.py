@@ -25,6 +25,9 @@ def test_exports_a_root_level_action_repo(tmp_path: Path) -> None:
         ".github/workflows/self-test.yml",
         "self-test/test_fixture.py",
         "self-test/check_results.py",
+        "self-test/check_diagnosis.py",
+        "self-test-diagnose/pyproject.toml",
+        "self-test-diagnose/test_registry.py",
     } <= files
     assert not any("__pycache__" in f for f in files)
     readme = (dest / "README.md").read_text()

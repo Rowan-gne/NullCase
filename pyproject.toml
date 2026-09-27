@@ -34,7 +34,7 @@ select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
 
 [tool.pyright]
 include = ["packages", "sandbox", "eval/harness", "scripts"]
-extraPaths = ["eval/harness"]
+extraPaths = ["eval/harness", "packages/upload-action"]
 pythonVersion = "3.11"
 typeCheckingMode = "strict"
 venvPath = "."
@@ -42,7 +42,7 @@ venv = ".venv"
 
 [tool.pytest.ini_options]
 testpaths = ["packages", "sandbox", "eval/harness"]
-pythonpath = ["eval/harness"]
+pythonpath = ["eval/harness", "packages/upload-action"]
 # pytest defaults, plus the upload action's stand-alone self-test fixture.
 norecursedirs = [".*", "*.egg", "_darcs", "build", "CVS", "dist", "node_modules", "venv", "{arch}", "standalone"]
 addopts = ["-p", "pytester", "--import-mode=importlib"]

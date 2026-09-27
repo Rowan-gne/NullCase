@@ -130,7 +130,7 @@ jobs:
   action:
     name: upload-action on a real runner (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: 20
     defaults:
       run:
         shell: bash
@@ -160,6 +160,21 @@ jobs:
         env:
           RESULTS: ${{ steps.nullcase.outputs.results-path }}
         run: python packages/upload-action/standalone/self-test/check_results.py "$RESULTS"
+
+      # Diagnose mode, with nullcase-sandbox installed from this checkout.
+      - id: diagnose
+        uses: ./packages/upload-action
+        with:
+          working-directory: packages/upload-action/standalone/self-test-diagnose
+          pytest-args: "-q"
+          plugin-source: ${{ github.workspace }}/packages/pytest-plugin
+          sandbox-source: ${{ github.workspace }}/sandbox
+          diagnose-tests: test_registry.py::test_first_registration_gets_id_1
+
+      - name: Check diagnosis
+        env:
+          DIAGNOSES: ${{ steps.diagnose.outputs.diagnoses-path }}
+        run: python packages/upload-action/standalone/self-test/check_diagnosis.py "$DIAGNOSES" order_dependent
 
   docker:
     runs-on: ubuntu-latest

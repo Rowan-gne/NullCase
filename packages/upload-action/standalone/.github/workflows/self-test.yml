@@ -1,6 +1,7 @@
 name: self-test
 
-# Runs this action on a real runner against a tiny fixture suite.
+# Runs this action on real runners against two tiny fixture suites, installing
+# nullcase-pytest and nullcase-sandbox from PyPI (the action's defaults).
 on:
   push:
   pull_request:
@@ -10,7 +11,15 @@ permissions:
 
 jobs:
   self-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -28,3 +37,15 @@ jobs:
         env:
           RESULTS: ${{ steps.nullcase.outputs.results-path }}
         run: python self-test/check_results.py "$RESULTS"
+
+      - id: diagnose
+        uses: ./
+        with:
+          working-directory: self-test-diagnose
+          pytest-args: "-q"
+          diagnose-tests: test_registry.py::test_first_registration_gets_id_1
+
+      - name: Check diagnosis
+        env:
+          DIAGNOSES: ${{ steps.diagnose.outputs.diagnoses-path }}
+        run: python self-test/check_diagnosis.py "$DIAGNOSES" order_dependent

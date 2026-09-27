@@ -1,0 +1,2 @@
+# Its own pytest rootdir, so node IDs are relative to this directory.
+[tool.pytest.ini_options]

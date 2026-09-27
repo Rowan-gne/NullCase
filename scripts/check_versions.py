@@ -1,4 +1,4 @@
-"""Check that every published package, and the action's pinned plugin, share one version.
+"""Check that every published package, and the action's pinned packages, share one version.
 
 Usage: python scripts/check_versions.py [EXPECTED]
 With EXPECTED (e.g. from a v0.1.0 tag, minus the "v"), versions must equal it.
@@ -21,8 +21,10 @@ def versions() -> dict[str, str]:
     for package in PACKAGES:
         project = tomllib.loads((ROOT / package / "pyproject.toml").read_text())["project"]
         found[project["name"]] = project["version"]
-    pin = re.search(r"nullcase-pytest==([0-9][^'\"\s]*)", ACTION.read_text())
-    found["upload-action plugin pin"] = pin.group(1) if pin else "<missing>"
+    action = ACTION.read_text()
+    for package, label in (("nullcase-pytest", "plugin"), ("nullcase-sandbox", "sandbox")):
+        pin = re.search(rf"{package}==([0-9][^'\"\s]*)", action)
+        found[f"upload-action {label} pin"] = pin.group(1) if pin else "<missing>"
     return found
 
 

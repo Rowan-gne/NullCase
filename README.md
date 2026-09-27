@@ -25,16 +25,18 @@ parallel        20      0   0.00  [0.00, 0.16]
 
 diagnosis: order_dependent (wilson interval)
 repro (--randomly-seed=3626764237, failed 3/3 replays):
-  cd eval/demo-repo && PYTHONHASHSEED=0 TZ=UTC python -m pytest -p no:cacheprovider -q --randomly-seed=3626764237 tests/test_order.py
+  cd eval/demo-repo && PYTHONHASHSEED=0 TZ=UTC \
+    python -m pytest -p no:cacheprovider -q \
+    --randomly-seed=3626764237 tests/test_order.py
 ```
 
-*Real output from this repository. Only the absolute paths in the last line
-are shortened.*
+*Real output from this repository. Absolute paths in the repro command are
+shortened, and the command is wrapped to fit narrow screens.*
 
-> **Status: early-stage.** This repo holds the public, open-source components,
-> and all of them run locally. The hosted service (API, GitHub App, dashboard,
-> billing) is designed in [docs/technical-guide.md](docs/technical-guide.md) but
-> **not deployed**. Version 0.1.0 is prepared but not yet published to PyPI.
+> **Status: early-stage.** This repo holds NullCase's open-source components,
+> and all of them run locally. A hosted service is in private development.
+> Version 0.1.0 is prepared but not yet published to PyPI or the GitHub
+> Marketplace.
 
 ## Local metrics
 
@@ -118,15 +120,11 @@ data.
 
 | Component | What it does | Not built yet |
 |---|---|---|
-| [pytest plugin](packages/pytest-plugin) | Writes one JSON Lines record per test (outcome, duration, file path, node ID), and works under pytest-xdist | upload to a backend, quarantine list (both stubs) |
-| [Experiment battery](sandbox) | The perturbations, diagnosis and repro commands; a single-test line-coverage check (`nullcase-coverage`); Dockerfile | running on remote sandbox VMs |
+| [pytest plugin](packages/pytest-plugin) | Writes one JSON Lines record per test (outcome, duration, file path, node ID), and works under pytest-xdist | upload to the hosted service, quarantine list (both stubs) |
+| [Experiment battery](sandbox) | The perturbations, diagnosis and repro commands; a single-test line-coverage check (`nullcase-coverage`); Dockerfile | — |
 | [Eval harness](eval) | Six seeded flaky tests, one per category, and a harness that scores the battery against their labels | an external, published flaky-test dataset |
 | [Retrieval](packages/retrieval) | Import-graph search for example tests, ranked by name and path similarity | embedding-based fallback (stub) |
 | [Upload action](packages/upload-action) | Composite GitHub Action that runs pytest with the plugin; runs on a real GitHub Actions runner in every CI build | the upload itself (stub); Marketplace listing |
-
-The hosted pieces (FastAPI backend, Postgres, GitHub App, AI-written fixes and
-billing) are designed in the [technical guide](docs/technical-guide.md) and not
-built in this repository.
 
 ## Quickstart
 
@@ -188,11 +186,7 @@ The timezone result depends on the time of day the harness runs.
 
 ## Further reading
 
-- [docs/technical-guide.md](docs/technical-guide.md): full architecture, data
-  model, and design decisions for the complete product. Its §6.2 file layout
-  describes an earlier single-repo plan and doesn't match this repository.
-- [CHANGELOG.md](CHANGELOG.md) and [RELEASING.md](RELEASING.md): the 0.1.0
-  release plan.
+- [CHANGELOG.md](CHANGELOG.md): what's in each release.
 - [SECURITY.md](SECURITY.md): how to report a vulnerability, and why the
   battery should only be run on code you trust.
 

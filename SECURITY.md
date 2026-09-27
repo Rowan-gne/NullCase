@@ -28,7 +28,4 @@ docker run --rm --network none -v "$PWD:/repo:ro" nullcase-battery tests/test_x.
 ```
 
 The container isolates the host filesystem and network, but it isn't a
-hardened sandbox. The planned hosted service runs untrusted code in ephemeral
-microVMs instead (see §3.6 of
-[docs/technical-guide.md](docs/technical-guide.md)); that isn't part of this
-repository.
+hardened sandbox.

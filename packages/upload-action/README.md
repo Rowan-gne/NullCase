@@ -1,18 +1,15 @@
 # upload-action
 
-GitHub Action wrapper for `nullcase-pytest` (§3.5 of
-[docs/technical-guide.md](https://github.com/Rowan-gne/NullCase/blob/main/docs/technical-guide.md)). It installs the
-plugin, runs pytest with local JSON Lines output, then passes the results to
+GitHub Action wrapper for `nullcase-pytest`. It installs the plugin, runs pytest with local JSON Lines output, then passes the results to
 `RemoteUploadSink`.
 
-**Upload is not implemented.** `RemoteUploadSink` is a stub because there is no
-backend yet. The action prints a `::notice::` and leaves the results file on
+**Upload is not implemented.** `RemoteUploadSink` is a stub until the hosted
+service exists. The action prints a `::notice::` and leaves the results file on
 the runner. The job's exit status is pytest's.
 
 ```yaml
 permissions:
   contents: read
-  # id-token: write   # will be needed for OIDC upload once it exists
 steps:
   - uses: actions/checkout@v7
   - uses: actions/setup-python@v7
@@ -43,11 +40,11 @@ Output: `results-path` (absolute path of the results file).
 
 ## Stand-alone repository
 
-The Marketplace requires `action.yml` at the root of its own public repository
-(§11.2). `scripts/export_upload_action.py DEST OWNER/REPO` assembles that
+The Marketplace requires `action.yml` at the root of its own public repository.
+`scripts/export_upload_action.py DEST OWNER/REPO` assembles that
 layout from this directory and `standalone/`. It adds a Marketplace README and
 a `self-test` workflow that runs the action on a real runner against a small
-fixture suite. See [RELEASING.md](https://github.com/Rowan-gne/NullCase/blob/main/RELEASING.md).
+fixture suite.
 
 ## Verification status
 

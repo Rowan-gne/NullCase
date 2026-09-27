@@ -30,7 +30,7 @@ nullcase = "nullcase_pytest.plugin"
 Homepage = "https://github.com/Rowan-gne/NullCase"
 Repository = "https://github.com/Rowan-gne/NullCase"
 Issues = "https://github.com/Rowan-gne/NullCase/issues"
-Documentation = "https://github.com/Rowan-gne/NullCase/blob/main/docs/technical-guide.md"
+Documentation = "https://github.com/Rowan-gne/NullCase#readme"
 
 [build-system]
 requires = ["hatchling"]

@@ -1,8 +1,7 @@
 # nullcase-sandbox
 
-The experiment battery from §3.7 of
-[docs/technical-guide.md](https://github.com/Rowan-gne/NullCase/blob/main/docs/technical-guide.md): re-run one test many
-times under controlled perturbations and see which one moves its failure rate.
+The NullCase experiment battery: re-run one test many times under controlled
+perturbations and see which one moves its failure rate.
 
 ## How it works
 
@@ -68,8 +67,7 @@ dependencies needs a derived image that installs them.
 
 ## Coverage check
 
-The last row of the §3.7 table: does one test actually execute given lines of
-a file? It runs the test alone under coverage.py, measuring only that file.
+Does one test actually execute given lines of a file? It runs the test alone under coverage.py, measuring only that file.
 
 ```bash
 uv run nullcase-coverage --project eval/demo-repo \
@@ -91,5 +89,4 @@ nothing generates tests yet.
 - Under `--network none` the baseline itself has no network, so a
   network-dependent test fails every run rather than being diagnosed as
   `network`.
-- Fly Machines orchestration (§3.6) is not implemented; this runs locally or
-  in Docker only.
+- It runs locally or in Docker only.

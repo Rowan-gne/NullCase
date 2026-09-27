@@ -1,8 +1,7 @@
 # demo-repo
 
-A small service with one deliberately flaky test per category from §6.6 of
-[docs/technical-guide.md](../../docs/technical-guide.md). The known root causes
-are recorded in [../harness/labels.json](../harness/labels.json).
+A small service with one deliberately flaky test per category the battery
+diagnoses. The known root causes are recorded in [../harness/labels.json](../harness/labels.json).
 
 | Test | Category | Why it flakes |
 |---|---|---|

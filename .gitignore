@@ -26,3 +26,9 @@ htmlcov/
 .vscode/
 .idea/
 .DS_Store
+
+# Private: maintainer and design docs, never published
+CLAUDE.md
+docs/
+RELEASING.md
+.claude/

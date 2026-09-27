@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -12,6 +13,23 @@ from nullcase_sandbox.battery import (
     plan,
     run_battery,
 )
+
+# UTC offset, in hours, that each TZ value must produce in a child process.
+EXPECTED_OFFSETS = {PINNED_ENV["TZ"]: 0, "AAA-14": 14, "BBB-12": 12, "CCC+12": -12, "DDD+11": -11}
+
+
+def posix_shell() -> list[str]:
+    """Prefix that runs a POSIX shell command string; Git Bash on Windows."""
+    if sys.platform != "win32":
+        return ["sh", "-c"]
+    exec_path = subprocess.run(
+        ["git", "--exec-path"], capture_output=True, text=True, check=True
+    ).stdout.strip()
+    bash = Path(exec_path).parents[2] / "bin" / "bash.exe"
+    if not bash.exists():
+        pytest.skip("Git Bash not found")
+    return [str(bash), "-c"]
+
 
 ORDER_DEPENDENT = """
 _registry = []
@@ -59,6 +77,22 @@ def test_plan_pins_baseline_and_varies_one_factor_per_perturbation() -> None:
     assert all("-n" in s.pytest_args for s in perturbations["parallel"])
 
 
+@pytest.mark.parametrize("tz", [PINNED_ENV["TZ"], *TIMEZONES])
+def test_tz_values_shift_local_time_in_a_child_process(tz: str) -> None:
+    assert set(EXPECTED_OFFSETS) == {PINNED_ENV["TZ"], *TIMEZONES}
+    probe = (
+        "import datetime; print(datetime.datetime.now().astimezone().utcoffset().total_seconds())"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", probe],
+        env={**os.environ, "TZ": tz},
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert float(result.stdout) == EXPECTED_OFFSETS[tz] * 3600
+
+
 @pytest.fixture
 def project(tmp_path: Path) -> Path:
     (tmp_path / "pyproject.toml").write_text("[tool.pytest.ini_options]\n", encoding="utf-8")
@@ -75,8 +109,11 @@ def test_diagnoses_order_dependent_test_with_working_repro(project: Path) -> Non
     assert report.repro is not None
     assert "--randomly-seed=" in report.repro.command
 
-    replay = subprocess.run(report.repro.command, shell=True, capture_output=True, check=False)
-    assert replay.returncode == 1, replay.stdout
+    replay = subprocess.run(
+        [*posix_shell(), report.repro.command], capture_output=True, text=True, check=False
+    )
+    assert replay.returncode == 1, replay.stdout + replay.stderr
+    assert "1 failed" in replay.stdout
 
 
 def test_unknown_nodeid_is_reported(project: Path) -> None:

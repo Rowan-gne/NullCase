@@ -1,5 +1,5 @@
-name: NullCase test results
-description: Run pytest with the nullcase-pytest plugin and record per-test results.
+name: NullCase flaky test diagnosis
+description: Run pytest, record per-test results, and find out why failing tests are flaky by controlled experiment.
 author: Rowan-gne
 branding:
   icon: check-circle
@@ -11,9 +11,13 @@ inputs:
     required: false
     default: ""
   working-directory:
-    description: Directory to run pytest in.
+    description: Directory to run pytest in. For diagnosis, this should be the pytest rootdir.
     required: false
     default: "."
+  python:
+    description: Interpreter with the project's dependencies installed (default python on PATH).
+    required: false
+    default: ""
   results-path:
     description: Where to write the JSON Lines results, relative to working-directory.
     required: false
@@ -22,11 +26,42 @@ inputs:
     description: pip requirement for nullcase-pytest (a version, path or URL).
     required: false
     default: nullcase-pytest==0.1.0
+  diagnose:
+    description: Set to "failed" to diagnose tests that failed in this run; "false" turns it off.
+    required: false
+    default: "false"
+  diagnose-tests:
+    description: Node IDs to diagnose whatever their outcome, one per line.
+    required: false
+    default: ""
+  max-diagnoses:
+    description: Most tests to diagnose in one run.
+    required: false
+    default: "3"
+  diagnose-timeout-minutes:
+    description: Time budget for all diagnoses; no new diagnosis starts after it.
+    required: false
+    default: "15"
+  baseline-runs:
+    description: Baseline runs per diagnosed test.
+    required: false
+    default: "20"
+  runs:
+    description: Runs per perturbation per diagnosed test.
+    required: false
+    default: "20"
+  sandbox-source:
+    description: pip requirement for nullcase-sandbox, installed only when diagnosing.
+    required: false
+    default: nullcase-sandbox==0.1.0
 
 outputs:
   results-path:
     description: Path of the JSON Lines results file.
     value: ${{ steps.run.outputs.results-path }}
+  diagnoses-path:
+    description: Path of the JSON diagnoses file (empty when nothing was diagnosed).
+    value: ${{ steps.run.outputs.diagnoses-path }}
 
 runs:
   using: composite
@@ -35,7 +70,15 @@ runs:
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       env:
+        NULLCASE_PYTHON: ${{ inputs.python }}
         NULLCASE_PYTEST_ARGS: ${{ inputs.pytest-args }}
         NULLCASE_RESULTS_PATH: ${{ inputs.results-path }}
         NULLCASE_PLUGIN_SOURCE: ${{ inputs.plugin-source }}
-      run: python "$GITHUB_ACTION_PATH/entrypoint.py"
+        NULLCASE_DIAGNOSE: ${{ inputs.diagnose }}
+        NULLCASE_DIAGNOSE_TESTS: ${{ inputs.diagnose-tests }}
+        NULLCASE_MAX_DIAGNOSES: ${{ inputs.max-diagnoses }}
+        NULLCASE_DIAGNOSE_TIMEOUT_MINUTES: ${{ inputs.diagnose-timeout-minutes }}
+        NULLCASE_BASELINE_RUNS: ${{ inputs.baseline-runs }}
+        NULLCASE_RUNS: ${{ inputs.runs }}
+        NULLCASE_SANDBOX_SOURCE: ${{ inputs.sandbox-source }}
+      run: '"${NULLCASE_PYTHON:-python}" "$GITHUB_ACTION_PATH/entrypoint.py"'

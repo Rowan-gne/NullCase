@@ -1,4 +1,4 @@
-"""Entrypoint for the NullCase GitHub Action (docs/technical-guide.md §3.5).
+"""Entrypoint for the NullCase GitHub Action.
 
 Installs nullcase-pytest if it isn't importable, runs pytest with local JSON
 Lines output, then passes the results to RemoteUploadSink. That sink is still
@@ -45,9 +45,7 @@ def upload(results: Path) -> None:
             sink.write(ResultRecord(**json.loads(line)))
         sink.close()
     except NotImplementedError:
-        # TODO: real upload. Request a GitHub OIDC token (audience "nullcase",
-        # workflow needs `permissions: id-token: write`) and send the results to
-        # the NullCase API. Blocked until the backend exists.
+        # TODO: real upload, once the hosted service exists.
         print(
             f"::notice title=NullCase::Upload not implemented yet (TODO); "
             f"results kept locally at {results}"

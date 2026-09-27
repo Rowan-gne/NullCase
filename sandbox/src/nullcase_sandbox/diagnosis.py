@@ -1,4 +1,4 @@
-"""Turns failure rates into a category (docs/technical-guide.md §3.7, diagnosis rule)."""
+"""Turns failure rates into a category."""
 
 from __future__ import annotations
 

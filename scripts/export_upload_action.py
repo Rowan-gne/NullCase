@@ -3,8 +3,8 @@
 Usage: python scripts/export_upload_action.py DEST OWNER/REPO
 
 DEST must not exist or must be empty. The Marketplace requires action.yml at the
-root of its own public repository (docs/technical-guide.md §11.2); this copies
-packages/upload-action into that layout. It does not create or push the repo.
+root of its own public repository; this copies packages/upload-action into
+that layout. It does not create or push the repo.
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""Plans and runs the experiment battery against one test (docs/technical-guide.md §3.7).
+"""Plans and runs the experiment battery against one test.
 
 Every run is a fresh ``python -m pytest`` subprocess in the target project,
 with results read back through the nullcase-pytest plugin. The baseline pins

@@ -9,7 +9,8 @@ GitHub Marketplace yet. Supports Python 3.11–3.14, all tested in CI.
 - Records one result per test (node ID, file path, outcome, duration) to a
   local JSON Lines file with `--nullcase-results PATH`. Works under
   pytest-xdist.
-- `RemoteUploadSink` and the quarantine list are stubs until a backend exists.
+- `RemoteUploadSink` and the quarantine list are stubs until the hosted service
+  exists.
 
 ### nullcase-sandbox
 - `nullcase-battery`: re-runs one test under baseline, order, hash-seed,

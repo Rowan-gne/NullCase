@@ -55,7 +55,7 @@ class ResultRecorder:
 
     def pytest_sessionstart(self) -> None:
         # TODO: once the quarantine list is real, quarantined failures should
-        # be reported but not fail the job (technical guide, design review 10).
+        # be reported but not fail the job.
         self.quarantined = fetch_quarantine_list()
 
     def pytest_runtest_logreport(self, report: pytest.TestReport) -> None:

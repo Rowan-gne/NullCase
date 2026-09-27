@@ -1,8 +1,8 @@
-"""Coverage check for one test (docs/technical-guide.md §3.7, last battery row).
+"""Coverage check for one test.
 
 Runs a single test under coverage.py, measuring only the target file, and
-reports which of the requested lines it executed. This is the check meant to
-confirm that a generated test exercises the code it was written for.
+reports which of the requested lines it executed, confirming that a new
+test exercises the code it was written for.
 """
 
 from __future__ import annotations

@@ -39,15 +39,7 @@ class LocalFileSink(ResultsSink):
 
 
 class RemoteUploadSink(ResultsSink):
-    """Uploads results to the NullCase API. Not implemented.
-
-    Planned design (docs/technical-guide.md §3.5): inside GitHub Actions the
-    plugin requests an OIDC token with audience ``nullcase`` (the workflow
-    grants ``permissions: id-token: write``) and uploads the results with it;
-    the API verifies the token's signature, issuer, audience and
-    ``repository`` claim. Fork PRs receive no OIDC token, so upload is skipped
-    silently there. No backend exists yet, so this sink only raises.
-    """
+    """Uploads results to the NullCase service. Not implemented; raises."""
 
     def write(self, record: ResultRecord) -> None:
         raise NotImplementedError("Remote upload is not implemented yet; use LocalFileSink.")

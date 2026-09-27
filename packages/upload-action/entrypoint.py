@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import importlib.metadata
 import importlib.util
+import io
 import json
 import os
 import shlex
@@ -184,7 +185,13 @@ def run_diagnoses(targets: Sequence[str], settings: Settings, project: Path) -> 
         print(f"::group::NullCase: diagnosing {nodeid}", flush=True)
         try:
             result = subprocess.run(
-                command, capture_output=True, text=True, timeout=remaining, check=False
+                command,
+                env={**os.environ, "PYTHONIOENCODING": "utf-8"},
+                capture_output=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=remaining,
+                check=False,
             )
         except subprocess.TimeoutExpired:
             diagnoses.append(Diagnosis(nodeid, "skipped", message="time budget used up"))
@@ -322,6 +329,11 @@ def set_output(name: str, value: str) -> None:
 
 
 def main() -> int:
+    # Workflow logs are UTF-8; Windows would otherwise write the ANSI code page,
+    # and fail outright on characters it can't encode.
+    for stream in (sys.stdout, sys.stderr):
+        if isinstance(stream, io.TextIOWrapper):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     try:
         settings = read_settings(os.environ)
     except ValueError as exc:

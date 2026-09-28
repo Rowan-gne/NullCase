@@ -66,8 +66,14 @@ repository.
 The same author wrote these tests and NullCase, so this shows the fix loop
 working on known kinds of flakiness, not a success rate on real projects.
 
-The first fix is open as a draft PR:
-[nullcase-demo#1](https://github.com/Rowan-gne/nullcase-demo/pull/1).
+Each fix is open as a draft PR in the demo repository:
+[#1](https://github.com/Rowan-gne/nullcase-demo/pull/1) order,
+[#2](https://github.com/Rowan-gne/nullcase-demo/pull/2) hash order,
+[#3](https://github.com/Rowan-gne/nullcase-demo/pull/3) timezone,
+[#4](https://github.com/Rowan-gne/nullcase-demo/pull/4) concurrency and
+[#5](https://github.com/Rowan-gne/nullcase-demo/pull/5) timing. CI is red on
+#2–#5 only because the demo's CI runs `tests/`, where the order bug that #1
+fixes still fails.
 
 <p align="center">
   <img src="assets/fix-experiment.svg" width="880" alt="Live fix experiment on Rowan-gne/nullcase-demo with claude-sonnet-5-5, one run per seeded flaky test. Order-dependent, hash order, concurrency and timing tests fixed on the first attempt; the timezone test fixed on the third attempt after one attempt was rejected for editing the assertion and one for breaking a healthy billing test, and accepted with a review flag; failures dropped to 0 of 20 in every case. The network test was not attempted because the offline sandbox makes it fail every run. 5 of 5 fixable tests fixed, 7 model calls, $0.061 in total.">

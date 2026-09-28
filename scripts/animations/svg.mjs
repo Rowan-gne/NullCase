@@ -48,6 +48,19 @@ export function spans(x, y, runs, { size = 12.5 } = {}) {
   return out.join("");
 }
 
+// One line of mixed styles that flows like ordinary text: [[text, {fill, weight, mono}], ...].
+export function rich(x, y, runs, { size = 13, anchor = "start" } = {}) {
+  const inner = runs
+    .map(([content, { fill, weight, mono } = {}]) => {
+      const klass = mono ? ` class="mono"` : "";
+      const bold = weight ? ` font-weight="${weight}"` : "";
+      const style = fill ? ` style="fill:${fill}"` : "";
+      return `<tspan${klass}${bold}${style}>${esc(content)}</tspan>`;
+    })
+    .join("");
+  return `<text x="${x}" y="${y}" font-size="${size}" text-anchor="${anchor}" xml:space="preserve">${inner}</text>`;
+}
+
 export function rect(x, y, w, h, { fill = COLORS.card, stroke, rx = 0, opacity } = {}) {
   const s = stroke ? ` stroke="${stroke}"` : "";
   const o = opacity !== undefined ? ` fill-opacity="${opacity}"` : "";

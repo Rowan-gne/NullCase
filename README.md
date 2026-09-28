@@ -48,6 +48,17 @@ shortened, and the command is wrapped to fit narrow screens.*
 > Version 0.1.0 is prepared but not yet published to PyPI or the GitHub
 > Marketplace.
 
+The private service goes one step further. It asks a model for a fix and
+accepts it only if the same experiments now pass every time. Its first fix,
+for the demo repository's order-dependent test, was proposed by
+`claude-sonnet-5-5` on 2026-09-28 and passed 120 of 120 runs. It's open as a
+draft PR: [nullcase-demo#1](https://github.com/Rowan-gne/nullcase-demo/pull/1).
+That's one fix, so there's no success rate yet.
+
+<p align="center">
+  <img src="assets/draft-pr.svg" width="880" alt="Draft pull request #1 on Rowan-gne/nullcase-demo, opened by NullCase: the same experiments re-run on the patched code show order failures dropping from 13 of 20 to 0 of 20 with every other experiment at 0 of 20; the repro passes 5 of 5; three anti-cheat checks are ticked; the provenance line says the patch was proposed by claude-sonnet-5-5 for $0.0095 and accepted by the NullCase battery, not by the model; the CI check passes.">
+</p>
+
 ## Local metrics
 
 Measured on 2026-09-24 on an Apple M3 laptop (macOS 14.6, Python 3.12.7) unless

@@ -49,11 +49,29 @@ shortened, and the command is wrapped to fit narrow screens.*
 > Marketplace.
 
 The private service goes one step further. It asks a model for a fix and
-accepts it only if the same experiments now pass every time. Its first fix,
-for the demo repository's order-dependent test, was proposed by
-`claude-sonnet-5-5` on 2026-09-28 and passed 120 of 120 runs. It's open as a
-draft PR: [nullcase-demo#1](https://github.com/Rowan-gne/nullcase-demo/pull/1).
-That's one fix, so there's no success rate yet.
+accepts it only if the same experiments now pass every time. On 2026-09-28,
+`claude-sonnet-5-5` got one live run on each seeded flaky test in the demo
+repository.
+
+- **Fixed:** all 5 tests NullCase diagnosed as fixable (order, hash order,
+  timezone, concurrency and timing), 4 of them on the first attempt, for
+  $0.061 in total.
+- **Not attempted:** the network test fails every run because the sandbox is
+  offline, so NullCase classified it as broken.
+- **Flagged:** the timezone fix. After the gate rejected an edited assertion,
+  the model kept the assertion and made the test's `date.today()` return the
+  UTC date instead. The result is correct, but it gets around the rule, so a
+  human should review it.
+
+The same author wrote these tests and NullCase, so this shows the fix loop
+working on known kinds of flakiness, not a success rate on real projects.
+
+The first fix is open as a draft PR:
+[nullcase-demo#1](https://github.com/Rowan-gne/nullcase-demo/pull/1).
+
+<p align="center">
+  <img src="assets/fix-experiment.svg" width="880" alt="Live fix experiment on Rowan-gne/nullcase-demo with claude-sonnet-5-5, one run per seeded flaky test. Order-dependent, hash order, concurrency and timing tests fixed on the first attempt; the timezone test fixed on the third attempt after one attempt was rejected for editing the assertion and one for breaking a healthy billing test, and accepted with a review flag; failures dropped to 0 of 20 in every case. The network test was not attempted because the offline sandbox makes it fail every run. 5 of 5 fixable tests fixed, 7 model calls, $0.061 in total.">
+</p>
 
 <p align="center">
   <img src="assets/draft-pr.svg" width="880" alt="Draft pull request #1 on Rowan-gne/nullcase-demo, opened by NullCase: the same experiments re-run on the patched code show order failures dropping from 13 of 20 to 0 of 20 with every other experiment at 0 of 20; the repro passes 5 of 5; three anti-cheat checks are ticked; the provenance line says the patch was proposed by claude-sonnet-5-5 for $0.0095 and accepted by the NullCase battery, not by the model; the CI check passes.">

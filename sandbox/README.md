@@ -3,6 +3,10 @@
 The NullCase experiment battery: re-run one test many times under controlled
 perturbations and see which one moves its failure rate.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Rowan-gne/NullCase/main/assets/battery.svg" width="880" alt="nullcase-battery on the demo's order-dependent test: 0 of 10 pinned runs fail and 7 of 10 shuffled runs fail; the 95% Wilson intervals don't overlap, so the diagnosis is order_dependent, with a repro command that failed 3 of 3 replays.">
+</p>
+
 ## How it works
 
 Every run is a fresh `python -m pytest` subprocess in the target project;

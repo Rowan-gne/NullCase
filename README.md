@@ -12,6 +12,10 @@
 
 See it run in GitHub Actions on a seeded incident: [Rowan-gne/nullcase-demo](https://github.com/Rowan-gne/nullcase-demo).
 
+<p align="center">
+  <img src="assets/ci-annotation.svg" width="880" alt="The NullCase Action in a real CI run on Rowan-gne/nullcase-demo: pytest fails tests/test_registry.py::test_first_user_gets_id_1, the Action re-runs it under controlled perturbations, and the run gets a warning annotation titled NullCase: order_dependent.">
+</p>
+
 Most flaky-test tools stop at "this test sometimes fails." NullCase re-runs the
 test under controlled conditions, changing one factor at a time: test order,
 hash seed, network access, timezone and parallelism. It then uses a
@@ -137,6 +141,12 @@ git clone https://github.com/Rowan-gne/NullCase.git && cd NullCase
 uv sync
 uv run nullcase-battery --project eval/demo-repo tests/test_order.py::test_first_user_gets_id_1
 ```
+
+A shorter run of the same test, limited to the order experiment:
+
+<p align="center">
+  <img src="assets/battery.svg" width="880" alt="nullcase-battery on the demo's order-dependent test: 0 of 10 pinned runs fail and 7 of 10 shuffled runs fail; the 95% Wilson intervals don't overlap, so the diagnosis is order_dependent, with a repro command that failed 3 of 3 replays.">
+</p>
 
 To run the battery on your own project:
 `uv run nullcase-battery --project path/to/project tests/test_x.py::test_y`.

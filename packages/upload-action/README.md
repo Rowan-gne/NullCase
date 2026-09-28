@@ -7,6 +7,10 @@ then installs `nullcase-sandbox`, runs the experiment battery on each chosen
 test and writes the diagnosis to the job summary, as file annotations and as
 JSON. The job's exit status is always pytest's.
 
+<p align="center">
+  <img src="../../assets/ci-annotation.svg" width="880" alt="The NullCase Action in a real CI run on Rowan-gne/nullcase-demo: pytest fails tests/test_registry.py::test_first_user_gets_id_1, the Action re-runs it under controlled perturbations, and the run gets a warning annotation titled NullCase: order_dependent.">
+</p>
+
 **Upload is not implemented.** `RemoteUploadSink` is a stub until the hosted
 service exists. The action logs where the results file is and leaves it on the
 runner.

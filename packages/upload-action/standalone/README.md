@@ -10,6 +10,10 @@ parallelism. A 95% Wilson score interval decides which factor changes the
 failure rate. The result goes to the job summary, with a command that
 reproduces the failure when one is confirmed.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Rowan-gne/NullCase/main/assets/ci-annotation.svg" width="880" alt="The NullCase Action in a real CI run on Rowan-gne/nullcase-demo: pytest fails tests/test_registry.py::test_first_user_gets_id_1, the Action re-runs it under controlled perturbations, and the run gets a warning annotation titled NullCase: order_dependent.">
+</p>
+
 Part of [NullCase](https://github.com/Rowan-gne/NullCase). **Early-stage:**
 everything runs on the runner, and nothing is sent anywhere.
 

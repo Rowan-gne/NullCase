@@ -9,6 +9,10 @@ pytest plugin that records one result per test, for
 pytest --nullcase-results=results.jsonl
 ```
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Rowan-gne/NullCase/main/assets/plugin.svg" width="880" alt="pytest run with --nullcase-results=results.jsonl on three demo tests; results.jsonl then holds one JSON record per test with its duration, file path, node ID and outcome.">
+</p>
+
 Without `--nullcase-results` the plugin does nothing. With it, each test
 produces one JSON line:
 

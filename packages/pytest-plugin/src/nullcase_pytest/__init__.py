@@ -1,1 +1,1 @@
-"""NullCase pytest plugin. Not implemented yet."""
+"""NullCase pytest plugin: records one result per test to a local JSON Lines file."""

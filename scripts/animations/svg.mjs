@@ -133,8 +133,9 @@ export class Scene {
     const clip = this.id("c");
     const move = this.id("m");
     const caret = this.id("u");
+    const gone = this.id("h");
     this.defs.push(
-      `<clipPath id="${clip}"><rect x="${x - 1}" y="${y - size}" width="${(width + advance + 2).toFixed(1)}" height="${size * 1.45}"/></clipPath>`,
+      `<clipPath id="${clip}"><rect x="${x - 1}" y="${y - size}" width="${(width * 1.04 + advance + 2).toFixed(1)}" height="${size * 1.45}"/></clipPath>`,
     );
     this.styles.push(
       `@keyframes ${move}{0%,${this.p(at)}%{transform:translateX(0);animation-timing-function:steps(${content.length},end)}` +
@@ -142,10 +143,14 @@ export class Scene {
         `.${move}{transform:translateX(${width.toFixed(1)}px);animation:${move} ${this.loop}s linear infinite}`,
       `@keyframes ${caret}{0%,${this.p(at + dur + 0.35)}%{opacity:1}${this.p(at + dur + 0.4)}%,100%{opacity:0}}` +
         `.${caret}{opacity:0;animation:${caret} ${this.loop}s linear infinite}`,
+      // Real monospace fonts run slightly wider than MONO_ADVANCE, so the cover is
+      // removed once typing ends rather than left where it might clip the last letter.
+      `@keyframes ${gone}{0%,${this.p(at + dur)}%{opacity:1}${this.p(at + dur + 0.02)}%,100%{opacity:0}}` +
+        `.${gone}{opacity:0;animation:${gone} ${this.loop}s linear infinite}`,
     );
     const body =
       `<g clip-path="url(#${clip})">${text(x, y, content, { size, fill, cls: "mono" })}` +
-      `<g class="a ${move}">${rect(x, y - size, width + advance + 4, size * 1.45, { fill: cover })}` +
+      `<g class="a ${move}"><g class="a ${gone}">${rect(x, y - size, width + advance + 4, size * 1.45, { fill: cover })}</g>` +
       `<rect class="a ${caret}" x="${x}" y="${y - size + 1.5}" width="${advance.toFixed(1)}" height="${size * 1.15}" fill="${COLORS.sky}"/></g></g>`;
     this.show(body, at - 0.05, { fade: 0.05 });
     return at + dur;

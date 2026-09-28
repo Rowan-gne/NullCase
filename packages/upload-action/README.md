@@ -8,8 +8,8 @@ test and writes the diagnosis to the job summary, as file annotations and as
 JSON. The job's exit status is always pytest's.
 
 **Upload is not implemented.** `RemoteUploadSink` is a stub until the hosted
-service exists. The action prints a `::notice::` and leaves the results file on
-the runner.
+service exists. The action logs where the results file is and leaves it on the
+runner.
 
 User-facing documentation (usage, inputs, an example job summary and caveats)
 is the Marketplace README in [standalone/README.md](standalone/README.md).

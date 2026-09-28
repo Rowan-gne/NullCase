@@ -63,7 +63,8 @@ def test_writes_local_results_and_marks_upload_todo(tmp_path: Path) -> None:
         ("test_sample.py::test_ok", "passed"),
         ("test_sample.py::test_bad", "failed"),
     }
-    assert "::notice title=NullCase::Upload not implemented yet (TODO)" in result.stdout
+    assert "NullCase: results kept on the runner at" in result.stdout
+    assert "::notice" not in result.stdout  # no annotation on every run
     assert github_output.read_text() == f"results-path={project / 'out.jsonl'}\n"
 
 
@@ -79,7 +80,7 @@ def test_warns_when_pytest_writes_nothing(tmp_path: Path) -> None:
     for args in ["--collect-only", "--no-such-option"]:
         result = run(project, NULLCASE_PYTEST_ARGS=args)
         assert "::warning title=NullCase::pytest wrote no results" in result.stdout
-        assert "Upload not implemented" not in result.stdout
+        assert "results kept on the runner" not in result.stdout
 
 
 def test_rejects_bad_settings_before_running_pytest(tmp_path: Path) -> None:

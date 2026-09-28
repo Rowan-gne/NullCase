@@ -106,8 +106,8 @@ Outputs: `results-path` (JSON Lines, one record per test) and `diagnoses-path`
   `PATH`. Repro commands are for bash (Git Bash on Windows).
 - **Security.** Diagnosis runs your tests over a hundred times. Only use it on
   code you'd already run in CI.
-- **Uploading results to NullCase** isn't implemented yet; the action prints a
-  notice where that step will go.
+- **Uploading results to NullCase** isn't implemented yet; the action logs where
+  the results file is, on the runner.
 
 This repository is generated from `packages/upload-action` in the NullCase
 repo; make changes there.

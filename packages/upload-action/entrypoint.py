@@ -2,7 +2,8 @@
 
 Installs nullcase-pytest if it isn't importable, runs pytest with local JSON
 Lines output, then passes the results to RemoteUploadSink. That sink is still
-a stub until the hosted service exists, so the upload step only prints a notice.
+a stub until the hosted service exists, so the upload step only logs where the
+results are.
 
 Optionally diagnoses tests afterwards: installs nullcase-sandbox, runs its
 experiment battery on each chosen test and writes the result to the job
@@ -156,8 +157,8 @@ def upload(results: Path) -> None:
     except NotImplementedError:
         # TODO: real upload, once the hosted service exists.
         print(
-            f"::notice title=NullCase::Upload not implemented yet (TODO); "
-            f"results kept locally at {results}"
+            f"NullCase: results kept on the runner at {results}; "
+            "uploading them to a hosted service isn't available yet."
         )
 
 

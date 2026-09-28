@@ -1,7 +1,7 @@
 name: Release
 
-# A version tag (v0.1.0) builds, checks and publishes nullcase-pytest,
-# nullcase-retrieval and nullcase-sandbox to PyPI via Trusted Publishing.
+# A version tag (v0.1.0) builds, checks and publishes nullcase-pytest and
+# nullcase-sandbox to PyPI via Trusted Publishing.
 # Running it manually does everything except publish (a dry run).
 on:
   push:
@@ -43,7 +43,7 @@ jobs:
 
       - name: Build
         run: |
-          for package in nullcase-pytest nullcase-retrieval nullcase-sandbox; do
+          for package in nullcase-pytest nullcase-sandbox; do
             uv build --package "$package" --out-dir dist
           done
 

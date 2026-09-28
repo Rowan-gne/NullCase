@@ -12,7 +12,7 @@ import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGES = ("packages/pytest-plugin", "packages/retrieval", "sandbox")
+PACKAGES = ("packages/pytest-plugin", "sandbox")
 ACTION = ROOT / "packages/upload-action/action.yml"
 
 

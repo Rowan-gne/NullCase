@@ -102,9 +102,6 @@ data.
   not independent evidence.
 - **A repro command only when it's confirmed.** A repro is printed only after
   the failing setting has been replayed and failed 3 of 3 times.
-- **Static analysis with `ast`.** Retrieval builds a repository import graph,
-  resolving relative imports, to find existing tests that are good style
-  examples for a module.
 - **Release engineering.** A tag-triggered release workflow checks that every
   version matches, runs the tests, builds, runs `twine check --strict`,
   smoke-tests the wheels in a clean virtualenv, and is set up to publish through
@@ -123,7 +120,6 @@ data.
 | [pytest plugin](packages/pytest-plugin) | Writes one JSON Lines record per test (outcome, duration, file path, node ID), and works under pytest-xdist | upload to the hosted service, quarantine list (both stubs) |
 | [Experiment battery](sandbox) | The perturbations, diagnosis and repro commands; a single-test line-coverage check (`nullcase-coverage`); Dockerfile | — |
 | [Eval harness](eval) | Six seeded flaky tests, one per category, and a harness that scores the battery against their labels | an external, published flaky-test dataset |
-| [Retrieval](packages/retrieval) | Import-graph search for example tests, ranked by name and path similarity | embedding-based fallback (stub) |
 | [GitHub Action](packages/upload-action) | Runs pytest with the plugin; in diagnose mode, runs the battery on failing tests and writes the diagnosis to the job summary. CI runs it on Linux, macOS and Windows runners | the upload itself (stub); Marketplace listing |
 
 ## Quickstart

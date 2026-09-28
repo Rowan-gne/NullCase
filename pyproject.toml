@@ -3,7 +3,7 @@ name = "nullcase-workspace"
 version = "0.0.0"
 description = "Workspace root for the NullCase open-core packages"
 requires-python = ">=3.11"
-dependencies = ["nullcase-pytest", "nullcase-retrieval", "nullcase-sandbox"]
+dependencies = ["nullcase-pytest", "nullcase-sandbox"]
 
 [dependency-groups]
 dev = [
@@ -19,11 +19,10 @@ package = false
 
 [tool.uv.sources]
 nullcase-pytest = { workspace = true }
-nullcase-retrieval = { workspace = true }
 nullcase-sandbox = { workspace = true }
 
 [tool.uv.workspace]
-members = ["packages/pytest-plugin", "packages/retrieval", "sandbox"]
+members = ["packages/pytest-plugin", "sandbox"]
 
 [tool.ruff]
 line-length = 100
@@ -51,4 +50,4 @@ addopts = ["-p", "pytester", "--import-mode=importlib"]
 branch = true
 # Measure code the tests run in child processes (battery runs, entrypoint, CLIs).
 patch = ["subprocess"]
-source = ["nullcase_pytest", "nullcase_sandbox", "nullcase_retrieval"]
+source = ["nullcase_pytest", "nullcase_sandbox"]

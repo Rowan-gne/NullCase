@@ -98,7 +98,7 @@ jobs:
         run: |
           uv venv .venv-lowest
           VIRTUAL_ENV=.venv-lowest uv pip install --resolution lowest-direct \
-            ./packages/pytest-plugin ./packages/retrieval ./sandbox "hypothesis>=6.168"
+            ./packages/pytest-plugin ./sandbox "hypothesis>=6.168"
 
       - name: Test
         run: .venv-lowest/bin/python -m pytest
@@ -117,7 +117,7 @@ jobs:
 
       - name: Build
         run: |
-          for package in nullcase-pytest nullcase-retrieval nullcase-sandbox; do
+          for package in nullcase-pytest nullcase-sandbox; do
             uv build --package "$package" --out-dir dist
           done
 

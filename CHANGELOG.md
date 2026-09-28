@@ -30,10 +30,6 @@ Windows.
   UTC+1, so timezone runs didn't test the intended offsets. Offsets on Linux
   and macOS are unchanged.
 
-### nullcase-retrieval
-- Ranks existing tests that import a target module, using an `ast` import
-  graph. The embedding fallback is a stub.
-
 ### upload-action ("NullCase flaky test diagnosis")
 - A composite GitHub Action that installs the plugin, runs pytest and keeps
   the results on the runner. The upload itself is a stub.

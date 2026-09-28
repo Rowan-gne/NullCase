@@ -53,7 +53,7 @@ def main(argv: list[str]) -> int:
         return 2
     wheels = sorted(Path(argv[1]).resolve().glob("*.whl"))
     names = {w.name.split("-")[0] for w in wheels}
-    expected = {"nullcase_pytest", "nullcase_retrieval", "nullcase_sandbox"}
+    expected = {"nullcase_pytest", "nullcase_sandbox"}
     if names != expected:
         raise SystemExit(f"expected wheels for {sorted(expected)}, found {sorted(names)}")
 
@@ -67,7 +67,6 @@ def main(argv: list[str]) -> int:
         run(bin_dir / "nullcase-battery", "--help")
         run(bin_dir / "nullcase-coverage", "--help")
         run(python, "-m", "nullcase_sandbox", "--help")
-        run(python, "-c", "import nullcase_retrieval.retrieve")
 
         project = root / "project"
         project.mkdir()

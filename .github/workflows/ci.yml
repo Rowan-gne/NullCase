@@ -38,6 +38,15 @@ jobs:
       - name: Check versions agree
         run: uv run python scripts/check_versions.py
 
+      - name: Check no private files are tracked
+        run: |
+          tracked=$(git ls-files CLAUDE.md RELEASING.md docs .claude private .env)
+          if [ -n "$tracked" ]; then
+            echo "::error::private files are tracked:"
+            echo "$tracked"
+            exit 1
+          fi
+
   test:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20

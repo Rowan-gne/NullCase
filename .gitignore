@@ -32,3 +32,6 @@ CLAUDE.md
 docs/
 RELEASING.md
 .claude/
+
+# Private service workspace (its own repository), never published
+private/

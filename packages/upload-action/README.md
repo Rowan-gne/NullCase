@@ -53,7 +53,7 @@ suites, installing both packages from PyPI.
 - `action.yml` and both workflows pass actionlint.
 - This repo's CI runs the action on real Ubuntu, macOS and Windows runners,
   including a diagnose step, with the packages installed from the checkout.
-  The macOS and Windows jobs are new and haven't run yet.
+  All three passed, most recently on 2026-09-28 (commit `1b95df8`).
 - **Not yet verified:** the default PyPI sources, because nothing is published
   yet. The exported repo's `self-test` workflow will be the first run of that
   path.

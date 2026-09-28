@@ -6,6 +6,12 @@
 
 **Finds out *why* a flaky pytest test is flaky, by controlled experiment.**
 
+<p align="center">
+  <img src="assets/how-it-works.svg" width="880" alt="How NullCase diagnoses a flaky test: it re-runs the test 20 times with every factor pinned and 20 times each with one factor changed. Only the test-order runs fail, 13 of 20 against 0 of 20, and their 95% Wilson intervals don't overlap, so the diagnosis is order_dependent, with a repro command that failed 3 of 3 replays.">
+</p>
+
+See it run in GitHub Actions on a seeded incident: [Rowan-gne/nullcase-demo](https://github.com/Rowan-gne/nullcase-demo).
+
 Most flaky-test tools stop at "this test sometimes fails." NullCase re-runs the
 test under controlled conditions, changing one factor at a time: test order,
 hash seed, network access, timezone and parallelism. It then uses a

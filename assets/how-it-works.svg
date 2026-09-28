@@ -1,0 +1,305 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 520" width="880" height="520" role="img" aria-labelledby="title desc">
+<title id="title">How NullCase diagnoses a flaky test</title>
+<desc id="desc">A flaky test passes locally and fails in CI. NullCase re-runs it 20 times with every factor pinned and 20 times each with one factor changed. Only the test-order runs fail (13 of 20 against 0 of 20). Their 95% Wilson intervals don't overlap, so the diagnosis is order_dependent, with a repro command that failed 3 of 3 replays.</desc>
+<style>text{font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;fill:#e2e8f0}.mono{font-family:ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace}.muted{fill:#94a3b8}.b{font-weight:700}@keyframes a1{0%,1.88%{opacity:0}4.38%,92%{opacity:1}97%,100%{opacity:0}}.a1{animation:a1 16.0s linear infinite}@keyframes a2{0%,5%{opacity:0}5.1%,8.7%{opacity:1}8.8%,12.4%{opacity:0}12.5%,14.9%{opacity:1}15%,100%{opacity:0}}.a2{opacity:0;animation:a2 16.0s linear infinite}@keyframes a3{0%,8.7%{opacity:0}8.8%,12.4%{opacity:1}12.5%,14.9%{opacity:0}15%,92%{opacity:1}97%,100%{opacity:0}}.a3{animation:a3 16.0s linear infinite}@keyframes a4{0%,8.75%{opacity:0}10.31%,92%{opacity:1}97%,100%{opacity:0}}.a4{animation:a4 16.0s linear infinite}@keyframes a5{0%,9.56%{opacity:0}11.12%,92%{opacity:1}97%,100%{opacity:0}}.a5{animation:a5 16.0s linear infinite}@keyframes a6{0%,10.38%{opacity:0}11.94%,92%{opacity:1}97%,100%{opacity:0}}.a6{animation:a6 16.0s linear infinite}@keyframes a7{0%,11.19%{opacity:0}12.75%,92%{opacity:1}97%,100%{opacity:0}}.a7{animation:a7 16.0s linear infinite}@keyframes a8{0%,12.00%{opacity:0}13.56%,92%{opacity:1}97%,100%{opacity:0}}.a8{animation:a8 16.0s linear infinite}@keyframes a9{0%,12.81%{opacity:0}14.37%,92%{opacity:1}97%,100%{opacity:0}}.a9{animation:a9 16.0s linear infinite}@keyframes a10{0%,13.62%{opacity:0}15.19%,92%{opacity:1}97%,100%{opacity:0}}.a10{animation:a10 16.0s linear infinite}@keyframes a11{0%,14.44%{opacity:0}16.00%,92%{opacity:1}97%,100%{opacity:0}}.a11{animation:a11 16.0s linear infinite}@keyframes a12{0%,15.25%{opacity:0}16.81%,92%{opacity:1}97%,100%{opacity:0}}.a12{animation:a12 16.0s linear infinite}@keyframes a13{0%,16.06%{opacity:0}17.62%,92%{opacity:1}97%,100%{opacity:0}}.a13{animation:a13 16.0s linear infinite}@keyframes a14{0%,16.88%{opacity:0}18.44%,92%{opacity:1}97%,100%{opacity:0}}.a14{animation:a14 16.0s linear infinite}@keyframes a15{0%,17.69%{opacity:0}19.25%,92%{opacity:1}97%,100%{opacity:0}}.a15{animation:a15 16.0s linear infinite}@keyframes a16{0%,18.50%{opacity:0}20.06%,92%{opacity:1}97%,100%{opacity:0}}.a16{animation:a16 16.0s linear infinite}@keyframes a17{0%,19.31%{opacity:0}20.88%,92%{opacity:1}97%,100%{opacity:0}}.a17{animation:a17 16.0s linear infinite}@keyframes a18{0%,20.12%{opacity:0}21.69%,92%{opacity:1}97%,100%{opacity:0}}.a18{animation:a18 16.0s linear infinite}@keyframes a19{0%,20.94%{opacity:0}22.50%,92%{opacity:1}97%,100%{opacity:0}}.a19{animation:a19 16.0s linear infinite}@keyframes a20{0%,21.75%{opacity:0}23.31%,92%{opacity:1}97%,100%{opacity:0}}.a20{animation:a20 16.0s linear infinite}@keyframes a21{0%,22.56%{opacity:0}24.12%,92%{opacity:1}97%,100%{opacity:0}}.a21{animation:a21 16.0s linear infinite}@keyframes a22{0%,23.38%{opacity:0}24.94%,92%{opacity:1}97%,100%{opacity:0}}.a22{animation:a22 16.0s linear infinite}@keyframes a23{0%,24.19%{opacity:0}25.75%,92%{opacity:1}97%,100%{opacity:0}}.a23{animation:a23 16.0s linear infinite}@keyframes a24{0%,26.88%{opacity:0}29.38%,92%{opacity:1}97%,100%{opacity:0}}.a24{animation:a24 16.0s linear infinite}@keyframes a25{0%,8.75%{opacity:0}10.31%,92%{opacity:1}97%,100%{opacity:0}}.a25{animation:a25 16.0s linear infinite}@keyframes a26{0%,9.56%{opacity:0}11.12%,92%{opacity:1}97%,100%{opacity:0}}.a26{animation:a26 16.0s linear infinite}@keyframes a27{0%,10.38%{opacity:0}11.94%,92%{opacity:1}97%,100%{opacity:0}}.a27{animation:a27 16.0s linear infinite}@keyframes a28{0%,11.19%{opacity:0}12.75%,92%{opacity:1}97%,100%{opacity:0}}.a28{animation:a28 16.0s linear infinite}@keyframes a29{0%,12.00%{opacity:0}13.56%,92%{opacity:1}97%,100%{opacity:0}}.a29{animation:a29 16.0s linear infinite}@keyframes a30{0%,12.81%{opacity:0}14.37%,92%{opacity:1}97%,100%{opacity:0}}.a30{animation:a30 16.0s linear infinite}@keyframes a31{0%,13.62%{opacity:0}15.19%,92%{opacity:1}97%,100%{opacity:0}}.a31{animation:a31 16.0s linear infinite}@keyframes a32{0%,14.44%{opacity:0}16.00%,92%{opacity:1}97%,100%{opacity:0}}.a32{animation:a32 16.0s linear infinite}@keyframes a33{0%,15.25%{opacity:0}16.81%,92%{opacity:1}97%,100%{opacity:0}}.a33{animation:a33 16.0s linear infinite}@keyframes a34{0%,16.06%{opacity:0}17.62%,92%{opacity:1}97%,100%{opacity:0}}.a34{animation:a34 16.0s linear infinite}@keyframes a35{0%,16.88%{opacity:0}18.44%,92%{opacity:1}97%,100%{opacity:0}}.a35{animation:a35 16.0s linear infinite}@keyframes a36{0%,17.69%{opacity:0}19.25%,92%{opacity:1}97%,100%{opacity:0}}.a36{animation:a36 16.0s linear infinite}@keyframes a37{0%,18.50%{opacity:0}20.06%,92%{opacity:1}97%,100%{opacity:0}}.a37{animation:a37 16.0s linear infinite}@keyframes a38{0%,19.31%{opacity:0}20.88%,92%{opacity:1}97%,100%{opacity:0}}.a38{animation:a38 16.0s linear infinite}@keyframes a39{0%,20.12%{opacity:0}21.69%,92%{opacity:1}97%,100%{opacity:0}}.a39{animation:a39 16.0s linear infinite}@keyframes a40{0%,20.94%{opacity:0}22.50%,92%{opacity:1}97%,100%{opacity:0}}.a40{animation:a40 16.0s linear infinite}@keyframes a41{0%,21.75%{opacity:0}23.31%,92%{opacity:1}97%,100%{opacity:0}}.a41{animation:a41 16.0s linear infinite}@keyframes a42{0%,22.56%{opacity:0}24.12%,92%{opacity:1}97%,100%{opacity:0}}.a42{animation:a42 16.0s linear infinite}@keyframes a43{0%,23.38%{opacity:0}24.94%,92%{opacity:1}97%,100%{opacity:0}}.a43{animation:a43 16.0s linear infinite}@keyframes a44{0%,24.19%{opacity:0}25.75%,92%{opacity:1}97%,100%{opacity:0}}.a44{animation:a44 16.0s linear infinite}@keyframes a45{0%,26.88%{opacity:0}29.38%,92%{opacity:1}97%,100%{opacity:0}}.a45{animation:a45 16.0s linear infinite}@keyframes a46{0%,8.75%{opacity:0}10.31%,92%{opacity:1}97%,100%{opacity:0}}.a46{animation:a46 16.0s linear infinite}@keyframes a47{0%,9.56%{opacity:0}11.12%,92%{opacity:1}97%,100%{opacity:0}}.a47{animation:a47 16.0s linear infinite}@keyframes a48{0%,10.38%{opacity:0}11.94%,92%{opacity:1}97%,100%{opacity:0}}.a48{animation:a48 16.0s linear infinite}@keyframes a49{0%,11.19%{opacity:0}12.75%,92%{opacity:1}97%,100%{opacity:0}}.a49{animation:a49 16.0s linear infinite}@keyframes a50{0%,12.00%{opacity:0}13.56%,92%{opacity:1}97%,100%{opacity:0}}.a50{animation:a50 16.0s linear infinite}@keyframes a51{0%,12.81%{opacity:0}14.37%,92%{opacity:1}97%,100%{opacity:0}}.a51{animation:a51 16.0s linear infinite}@keyframes a52{0%,13.62%{opacity:0}15.19%,92%{opacity:1}97%,100%{opacity:0}}.a52{animation:a52 16.0s linear infinite}@keyframes a53{0%,14.44%{opacity:0}16.00%,92%{opacity:1}97%,100%{opacity:0}}.a53{animation:a53 16.0s linear infinite}@keyframes a54{0%,15.25%{opacity:0}16.81%,92%{opacity:1}97%,100%{opacity:0}}.a54{animation:a54 16.0s linear infinite}@keyframes a55{0%,16.06%{opacity:0}17.62%,92%{opacity:1}97%,100%{opacity:0}}.a55{animation:a55 16.0s linear infinite}@keyframes a56{0%,16.88%{opacity:0}18.44%,92%{opacity:1}97%,100%{opacity:0}}.a56{animation:a56 16.0s linear infinite}@keyframes a57{0%,17.69%{opacity:0}19.25%,92%{opacity:1}97%,100%{opacity:0}}.a57{animation:a57 16.0s linear infinite}@keyframes a58{0%,18.50%{opacity:0}20.06%,92%{opacity:1}97%,100%{opacity:0}}.a58{animation:a58 16.0s linear infinite}@keyframes a59{0%,19.31%{opacity:0}20.88%,92%{opacity:1}97%,100%{opacity:0}}.a59{animation:a59 16.0s linear infinite}@keyframes a60{0%,20.12%{opacity:0}21.69%,92%{opacity:1}97%,100%{opacity:0}}.a60{animation:a60 16.0s linear infinite}@keyframes a61{0%,20.94%{opacity:0}22.50%,92%{opacity:1}97%,100%{opacity:0}}.a61{animation:a61 16.0s linear infinite}@keyframes a62{0%,21.75%{opacity:0}23.31%,92%{opacity:1}97%,100%{opacity:0}}.a62{animation:a62 16.0s linear infinite}@keyframes a63{0%,22.56%{opacity:0}24.12%,92%{opacity:1}97%,100%{opacity:0}}.a63{animation:a63 16.0s linear infinite}@keyframes a64{0%,23.38%{opacity:0}24.94%,92%{opacity:1}97%,100%{opacity:0}}.a64{animation:a64 16.0s linear infinite}@keyframes a65{0%,24.19%{opacity:0}25.75%,92%{opacity:1}97%,100%{opacity:0}}.a65{animation:a65 16.0s linear infinite}@keyframes a66{0%,26.88%{opacity:0}29.38%,92%{opacity:1}97%,100%{opacity:0}}.a66{animation:a66 16.0s linear infinite}@keyframes a67{0%,8.75%{opacity:0}10.31%,92%{opacity:1}97%,100%{opacity:0}}.a67{animation:a67 16.0s linear infinite}@keyframes a68{0%,9.56%{opacity:0}11.12%,92%{opacity:1}97%,100%{opacity:0}}.a68{animation:a68 16.0s linear infinite}@keyframes a69{0%,10.38%{opacity:0}11.94%,92%{opacity:1}97%,100%{opacity:0}}.a69{animation:a69 16.0s linear infinite}@keyframes a70{0%,11.19%{opacity:0}12.75%,92%{opacity:1}97%,100%{opacity:0}}.a70{animation:a70 16.0s linear infinite}@keyframes a71{0%,12.00%{opacity:0}13.56%,92%{opacity:1}97%,100%{opacity:0}}.a71{animation:a71 16.0s linear infinite}@keyframes a72{0%,12.81%{opacity:0}14.37%,92%{opacity:1}97%,100%{opacity:0}}.a72{animation:a72 16.0s linear infinite}@keyframes a73{0%,13.62%{opacity:0}15.19%,92%{opacity:1}97%,100%{opacity:0}}.a73{animation:a73 16.0s linear infinite}@keyframes a74{0%,14.44%{opacity:0}16.00%,92%{opacity:1}97%,100%{opacity:0}}.a74{animation:a74 16.0s linear infinite}@keyframes a75{0%,15.25%{opacity:0}16.81%,92%{opacity:1}97%,100%{opacity:0}}.a75{animation:a75 16.0s linear infinite}@keyframes a76{0%,16.06%{opacity:0}17.62%,92%{opacity:1}97%,100%{opacity:0}}.a76{animation:a76 16.0s linear infinite}@keyframes a77{0%,16.88%{opacity:0}18.44%,92%{opacity:1}97%,100%{opacity:0}}.a77{animation:a77 16.0s linear infinite}@keyframes a78{0%,17.69%{opacity:0}19.25%,92%{opacity:1}97%,100%{opacity:0}}.a78{animation:a78 16.0s linear infinite}@keyframes a79{0%,18.50%{opacity:0}20.06%,92%{opacity:1}97%,100%{opacity:0}}.a79{animation:a79 16.0s linear infinite}@keyframes a80{0%,19.31%{opacity:0}20.88%,92%{opacity:1}97%,100%{opacity:0}}.a80{animation:a80 16.0s linear infinite}@keyframes a81{0%,20.12%{opacity:0}21.69%,92%{opacity:1}97%,100%{opacity:0}}.a81{animation:a81 16.0s linear infinite}@keyframes a82{0%,20.94%{opacity:0}22.50%,92%{opacity:1}97%,100%{opacity:0}}.a82{animation:a82 16.0s linear infinite}@keyframes a83{0%,21.75%{opacity:0}23.31%,92%{opacity:1}97%,100%{opacity:0}}.a83{animation:a83 16.0s linear infinite}@keyframes a84{0%,22.56%{opacity:0}24.12%,92%{opacity:1}97%,100%{opacity:0}}.a84{animation:a84 16.0s linear infinite}@keyframes a85{0%,23.38%{opacity:0}24.94%,92%{opacity:1}97%,100%{opacity:0}}.a85{animation:a85 16.0s linear infinite}@keyframes a86{0%,24.19%{opacity:0}25.75%,92%{opacity:1}97%,100%{opacity:0}}.a86{animation:a86 16.0s linear infinite}@keyframes a87{0%,26.88%{opacity:0}29.38%,92%{opacity:1}97%,100%{opacity:0}}.a87{animation:a87 16.0s linear infinite}@keyframes a88{0%,8.75%{opacity:0}10.31%,92%{opacity:1}97%,100%{opacity:0}}.a88{animation:a88 16.0s linear infinite}@keyframes a89{0%,9.56%{opacity:0}11.12%,92%{opacity:1}97%,100%{opacity:0}}.a89{animation:a89 16.0s linear infinite}@keyframes a90{0%,10.38%{opacity:0}11.94%,92%{opacity:1}97%,100%{opacity:0}}.a90{animation:a90 16.0s linear infinite}@keyframes a91{0%,11.19%{opacity:0}12.75%,92%{opacity:1}97%,100%{opacity:0}}.a91{animation:a91 16.0s linear infinite}@keyframes a92{0%,12.00%{opacity:0}13.56%,92%{opacity:1}97%,100%{opacity:0}}.a92{animation:a92 16.0s linear infinite}@keyframes a93{0%,12.81%{opacity:0}14.37%,92%{opacity:1}97%,100%{opacity:0}}.a93{animation:a93 16.0s linear infinite}@keyframes a94{0%,13.62%{opacity:0}15.19%,92%{opacity:1}97%,100%{opacity:0}}.a94{animation:a94 16.0s linear infinite}@keyframes a95{0%,14.44%{opacity:0}16.00%,92%{opacity:1}97%,100%{opacity:0}}.a95{animation:a95 16.0s linear infinite}@keyframes a96{0%,15.25%{opacity:0}16.81%,92%{opacity:1}97%,100%{opacity:0}}.a96{animation:a96 16.0s linear infinite}@keyframes a97{0%,16.06%{opacity:0}17.62%,92%{opacity:1}97%,100%{opacity:0}}.a97{animation:a97 16.0s linear infinite}@keyframes a98{0%,16.88%{opacity:0}18.44%,92%{opacity:1}97%,100%{opacity:0}}.a98{animation:a98 16.0s linear infinite}@keyframes a99{0%,17.69%{opacity:0}19.25%,92%{opacity:1}97%,100%{opacity:0}}.a99{animation:a99 16.0s linear infinite}@keyframes a100{0%,18.50%{opacity:0}20.06%,92%{opacity:1}97%,100%{opacity:0}}.a100{animation:a100 16.0s linear infinite}@keyframes a101{0%,19.31%{opacity:0}20.88%,92%{opacity:1}97%,100%{opacity:0}}.a101{animation:a101 16.0s linear infinite}@keyframes a102{0%,20.12%{opacity:0}21.69%,92%{opacity:1}97%,100%{opacity:0}}.a102{animation:a102 16.0s linear infinite}@keyframes a103{0%,20.94%{opacity:0}22.50%,92%{opacity:1}97%,100%{opacity:0}}.a103{animation:a103 16.0s linear infinite}@keyframes a104{0%,21.75%{opacity:0}23.31%,92%{opacity:1}97%,100%{opacity:0}}.a104{animation:a104 16.0s linear infinite}@keyframes a105{0%,22.56%{opacity:0}24.12%,92%{opacity:1}97%,100%{opacity:0}}.a105{animation:a105 16.0s linear infinite}@keyframes a106{0%,23.38%{opacity:0}24.94%,92%{opacity:1}97%,100%{opacity:0}}.a106{animation:a106 16.0s linear infinite}@keyframes a107{0%,24.19%{opacity:0}25.75%,92%{opacity:1}97%,100%{opacity:0}}.a107{animation:a107 16.0s linear infinite}@keyframes a108{0%,26.88%{opacity:0}29.38%,92%{opacity:1}97%,100%{opacity:0}}.a108{animation:a108 16.0s linear infinite}@keyframes a109{0%,8.75%{opacity:0}10.31%,92%{opacity:1}97%,100%{opacity:0}}.a109{animation:a109 16.0s linear infinite}@keyframes a110{0%,9.56%{opacity:0}11.12%,92%{opacity:1}97%,100%{opacity:0}}.a110{animation:a110 16.0s linear infinite}@keyframes a111{0%,10.38%{opacity:0}11.94%,92%{opacity:1}97%,100%{opacity:0}}.a111{animation:a111 16.0s linear infinite}@keyframes a112{0%,11.19%{opacity:0}12.75%,92%{opacity:1}97%,100%{opacity:0}}.a112{animation:a112 16.0s linear infinite}@keyframes a113{0%,12.00%{opacity:0}13.56%,92%{opacity:1}97%,100%{opacity:0}}.a113{animation:a113 16.0s linear infinite}@keyframes a114{0%,12.81%{opacity:0}14.37%,92%{opacity:1}97%,100%{opacity:0}}.a114{animation:a114 16.0s linear infinite}@keyframes a115{0%,13.62%{opacity:0}15.19%,92%{opacity:1}97%,100%{opacity:0}}.a115{animation:a115 16.0s linear infinite}@keyframes a116{0%,14.44%{opacity:0}16.00%,92%{opacity:1}97%,100%{opacity:0}}.a116{animation:a116 16.0s linear infinite}@keyframes a117{0%,15.25%{opacity:0}16.81%,92%{opacity:1}97%,100%{opacity:0}}.a117{animation:a117 16.0s linear infinite}@keyframes a118{0%,16.06%{opacity:0}17.62%,92%{opacity:1}97%,100%{opacity:0}}.a118{animation:a118 16.0s linear infinite}@keyframes a119{0%,16.88%{opacity:0}18.44%,92%{opacity:1}97%,100%{opacity:0}}.a119{animation:a119 16.0s linear infinite}@keyframes a120{0%,17.69%{opacity:0}19.25%,92%{opacity:1}97%,100%{opacity:0}}.a120{animation:a120 16.0s linear infinite}@keyframes a121{0%,18.50%{opacity:0}20.06%,92%{opacity:1}97%,100%{opacity:0}}.a121{animation:a121 16.0s linear infinite}@keyframes a122{0%,19.31%{opacity:0}20.88%,92%{opacity:1}97%,100%{opacity:0}}.a122{animation:a122 16.0s linear infinite}@keyframes a123{0%,20.12%{opacity:0}21.69%,92%{opacity:1}97%,100%{opacity:0}}.a123{animation:a123 16.0s linear infinite}@keyframes a124{0%,20.94%{opacity:0}22.50%,92%{opacity:1}97%,100%{opacity:0}}.a124{animation:a124 16.0s linear infinite}@keyframes a125{0%,21.75%{opacity:0}23.31%,92%{opacity:1}97%,100%{opacity:0}}.a125{animation:a125 16.0s linear infinite}@keyframes a126{0%,22.56%{opacity:0}24.12%,92%{opacity:1}97%,100%{opacity:0}}.a126{animation:a126 16.0s linear infinite}@keyframes a127{0%,23.38%{opacity:0}24.94%,92%{opacity:1}97%,100%{opacity:0}}.a127{animation:a127 16.0s linear infinite}@keyframes a128{0%,24.19%{opacity:0}25.75%,92%{opacity:1}97%,100%{opacity:0}}.a128{animation:a128 16.0s linear infinite}@keyframes a129{0%,26.88%{opacity:0}29.38%,92%{opacity:1}97%,100%{opacity:0}}.a129{animation:a129 16.0s linear infinite}@keyframes a130{0%,30.00%{transform:scaleX(0)}33.75%,92%{transform:scaleX(1);opacity:1}97%,100%{transform:scaleX(1);opacity:0}}.a130{transform-box:fill-box;transform-origin:left center;animation:a130 16.0s ease-out infinite}@keyframes a131{0%,33.12%{transform:scaleX(0)}36.88%,92%{transform:scaleX(1);opacity:1}97%,100%{transform:scaleX(1);opacity:0}}.a131{transform-box:fill-box;transform-origin:left center;animation:a131 16.0s ease-out infinite}@keyframes a132{0%,31.25%{transform:scaleX(0)}35.00%,92%{transform:scaleX(1);opacity:1}97%,100%{transform:scaleX(1);opacity:0}}.a132{transform-box:fill-box;transform-origin:left center;animation:a132 16.0s ease-out infinite}@keyframes a133{0%,39.38%{opacity:0}41.88%,92%{opacity:1}97%,100%{opacity:0}}.a133{animation:a133 16.0s linear infinite}@keyframes a134{0%,43.75%{opacity:0}46.25%,92%{opacity:1}97%,100%{opacity:0}}.a134{animation:a134 16.0s linear infinite}@keyframes a135{0%,48.75%{opacity:0}51.25%,92%{opacity:1}97%,100%{opacity:0}}.a135{animation:a135 16.0s linear infinite}@keyframes a136{0%,53.75%{opacity:0}56.25%,92%{opacity:1}97%,100%{opacity:0}}.a136{animation:a136 16.0s linear infinite}@keyframes a137{0%,58.75%{opacity:0}61.25%,92%{opacity:1}97%,100%{opacity:0}}.a137{animation:a137 16.0s linear infinite}@keyframes a138{0%,60.63%{opacity:0}63.13%,92%{opacity:1}97%,100%{opacity:0}}.a138{animation:a138 16.0s linear infinite}@keyframes a139{0%,62.50%{opacity:0}65.00%,92%{opacity:1}97%,100%{opacity:0}}.a139{animation:a139 16.0s linear infinite}@keyframes a140{0%,64.38%{opacity:0}66.88%,92%{opacity:1}97%,100%{opacity:0}}.a140{animation:a140 16.0s linear infinite}@media (prefers-reduced-motion:reduce){*{animation:none!important}}</style>
+<rect width="880" height="520" rx="18" fill="#0f172a"/>
+<text x="28" y="44" font-size="24" class="b" text-anchor="start">NullCase</text>
+<text x="28" y="68" font-size="14" class="muted" text-anchor="start">Finds out why a flaky pytest test is flaky, by controlled experiment.</text>
+<rect x="20" y="88" width="196" height="234" rx="12" fill="#1e293b" stroke="#334155"/>
+<circle cx="43" cy="114" r="11" fill="#38bdf8"/>
+<text x="43" y="118.5" font-size="12" class="b" text-anchor="middle" style="fill:#0f172a">1</text>
+<text x="62" y="118.5" font-size="13.5" class="b" text-anchor="start">A test fails sometimes</text>
+<text x="34" y="146" font-size="11" class="mono" text-anchor="start" style="fill:#fbbf24">test_first_user_gets_id_1</text>
+<text x="34" y="178" font-size="11" class="muted" text-anchor="start">on your laptop, in file order</text>
+<g class="a1"><rect x="34" y="186" width="168" height="26" rx="13" fill="#22c55e" fill-opacity="0.18" stroke="#22c55e"/><text x="118.0" y="203.5" font-size="12" class="b" text-anchor="middle" style="fill:#22c55e">PASS</text></g>
+<text x="34" y="236" font-size="11" class="muted" text-anchor="start">in CI, test order shuffled</text>
+<g class="a3"><rect x="34" y="244" width="168" height="26" rx="13" fill="#f43f5e" fill-opacity="0.18" stroke="#f43f5e"/><text x="118.0" y="261.5" font-size="12" class="b" text-anchor="middle" style="fill:#f43f5e">FAIL</text></g>
+<g class="a2"><rect x="34" y="244" width="168" height="26" rx="13" fill="#22c55e" fill-opacity="0.18" stroke="#22c55e"/><text x="118.0" y="261.5" font-size="12" class="b" text-anchor="middle" style="fill:#22c55e">PASS</text></g>
+<text x="34" y="302" font-size="11" class="muted" text-anchor="start">shuffled locally: 9 of 10 runs failed</text>
+<rect x="228" y="88" width="384" height="234" rx="12" fill="#1e293b" stroke="#334155"/>
+<circle cx="251" cy="114" r="11" fill="#38bdf8"/>
+<text x="251" y="118.5" font-size="12" class="b" text-anchor="middle" style="fill:#0f172a">2</text>
+<text x="270" y="118.5" font-size="13.5" class="b" text-anchor="start">Re-run it under control</text>
+<text x="244" y="154" font-size="12" class="b" text-anchor="start">baseline</text>
+<circle cx="332.0" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="332.0" cy="150" r="4.2" fill="#22c55e" class="a4"/>
+<circle cx="343.5" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="343.5" cy="150" r="4.2" fill="#22c55e" class="a5"/>
+<circle cx="355.0" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="355.0" cy="150" r="4.2" fill="#22c55e" class="a6"/>
+<circle cx="366.5" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="366.5" cy="150" r="4.2" fill="#22c55e" class="a7"/>
+<circle cx="378.0" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="378.0" cy="150" r="4.2" fill="#22c55e" class="a8"/>
+<circle cx="389.5" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="389.5" cy="150" r="4.2" fill="#22c55e" class="a9"/>
+<circle cx="401.0" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="401.0" cy="150" r="4.2" fill="#22c55e" class="a10"/>
+<circle cx="412.5" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="412.5" cy="150" r="4.2" fill="#22c55e" class="a11"/>
+<circle cx="424.0" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="424.0" cy="150" r="4.2" fill="#22c55e" class="a12"/>
+<circle cx="435.5" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="435.5" cy="150" r="4.2" fill="#22c55e" class="a13"/>
+<circle cx="447.0" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="447.0" cy="150" r="4.2" fill="#22c55e" class="a14"/>
+<circle cx="458.5" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="458.5" cy="150" r="4.2" fill="#22c55e" class="a15"/>
+<circle cx="470.0" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="470.0" cy="150" r="4.2" fill="#22c55e" class="a16"/>
+<circle cx="481.5" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="481.5" cy="150" r="4.2" fill="#22c55e" class="a17"/>
+<circle cx="493.0" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="493.0" cy="150" r="4.2" fill="#22c55e" class="a18"/>
+<circle cx="504.5" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="504.5" cy="150" r="4.2" fill="#22c55e" class="a19"/>
+<circle cx="516.0" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="516.0" cy="150" r="4.2" fill="#22c55e" class="a20"/>
+<circle cx="527.5" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="527.5" cy="150" r="4.2" fill="#22c55e" class="a21"/>
+<circle cx="539.0" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="539.0" cy="150" r="4.2" fill="#22c55e" class="a22"/>
+<circle cx="550.5" cy="150" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="550.5" cy="150" r="4.2" fill="#22c55e" class="a23"/>
+<text x="566" y="154" font-size="11.5" class="b a24" text-anchor="start" style="fill:#94a3b8">0/20</text>
+<text x="244" y="180" font-size="12" class="b" text-anchor="start">order</text>
+<circle cx="332.0" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="332.0" cy="176" r="4.2" fill="#22c55e" class="a25"/>
+<circle cx="343.5" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="343.5" cy="176" r="4.2" fill="#f43f5e" class="a26"/>
+<circle cx="355.0" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="355.0" cy="176" r="4.2" fill="#f43f5e" class="a27"/>
+<circle cx="366.5" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="366.5" cy="176" r="4.2" fill="#22c55e" class="a28"/>
+<circle cx="378.0" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="378.0" cy="176" r="4.2" fill="#f43f5e" class="a29"/>
+<circle cx="389.5" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="389.5" cy="176" r="4.2" fill="#f43f5e" class="a30"/>
+<circle cx="401.0" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="401.0" cy="176" r="4.2" fill="#22c55e" class="a31"/>
+<circle cx="412.5" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="412.5" cy="176" r="4.2" fill="#f43f5e" class="a32"/>
+<circle cx="424.0" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="424.0" cy="176" r="4.2" fill="#f43f5e" class="a33"/>
+<circle cx="435.5" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="435.5" cy="176" r="4.2" fill="#22c55e" class="a34"/>
+<circle cx="447.0" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="447.0" cy="176" r="4.2" fill="#f43f5e" class="a35"/>
+<circle cx="458.5" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="458.5" cy="176" r="4.2" fill="#f43f5e" class="a36"/>
+<circle cx="470.0" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="470.0" cy="176" r="4.2" fill="#22c55e" class="a37"/>
+<circle cx="481.5" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="481.5" cy="176" r="4.2" fill="#f43f5e" class="a38"/>
+<circle cx="493.0" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="493.0" cy="176" r="4.2" fill="#f43f5e" class="a39"/>
+<circle cx="504.5" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="504.5" cy="176" r="4.2" fill="#22c55e" class="a40"/>
+<circle cx="516.0" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="516.0" cy="176" r="4.2" fill="#f43f5e" class="a41"/>
+<circle cx="527.5" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="527.5" cy="176" r="4.2" fill="#f43f5e" class="a42"/>
+<circle cx="539.0" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="539.0" cy="176" r="4.2" fill="#22c55e" class="a43"/>
+<circle cx="550.5" cy="176" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="550.5" cy="176" r="4.2" fill="#f43f5e" class="a44"/>
+<text x="566" y="180" font-size="11.5" class="b a45" text-anchor="start" style="fill:#f43f5e">13/20</text>
+<text x="244" y="206" font-size="12" class="" text-anchor="start">hash seed</text>
+<circle cx="332.0" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="332.0" cy="202" r="4.2" fill="#22c55e" class="a46"/>
+<circle cx="343.5" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="343.5" cy="202" r="4.2" fill="#22c55e" class="a47"/>
+<circle cx="355.0" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="355.0" cy="202" r="4.2" fill="#22c55e" class="a48"/>
+<circle cx="366.5" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="366.5" cy="202" r="4.2" fill="#22c55e" class="a49"/>
+<circle cx="378.0" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="378.0" cy="202" r="4.2" fill="#22c55e" class="a50"/>
+<circle cx="389.5" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="389.5" cy="202" r="4.2" fill="#22c55e" class="a51"/>
+<circle cx="401.0" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="401.0" cy="202" r="4.2" fill="#22c55e" class="a52"/>
+<circle cx="412.5" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="412.5" cy="202" r="4.2" fill="#22c55e" class="a53"/>
+<circle cx="424.0" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="424.0" cy="202" r="4.2" fill="#22c55e" class="a54"/>
+<circle cx="435.5" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="435.5" cy="202" r="4.2" fill="#22c55e" class="a55"/>
+<circle cx="447.0" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="447.0" cy="202" r="4.2" fill="#22c55e" class="a56"/>
+<circle cx="458.5" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="458.5" cy="202" r="4.2" fill="#22c55e" class="a57"/>
+<circle cx="470.0" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="470.0" cy="202" r="4.2" fill="#22c55e" class="a58"/>
+<circle cx="481.5" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="481.5" cy="202" r="4.2" fill="#22c55e" class="a59"/>
+<circle cx="493.0" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="493.0" cy="202" r="4.2" fill="#22c55e" class="a60"/>
+<circle cx="504.5" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="504.5" cy="202" r="4.2" fill="#22c55e" class="a61"/>
+<circle cx="516.0" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="516.0" cy="202" r="4.2" fill="#22c55e" class="a62"/>
+<circle cx="527.5" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="527.5" cy="202" r="4.2" fill="#22c55e" class="a63"/>
+<circle cx="539.0" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="539.0" cy="202" r="4.2" fill="#22c55e" class="a64"/>
+<circle cx="550.5" cy="202" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="550.5" cy="202" r="4.2" fill="#22c55e" class="a65"/>
+<text x="566" y="206" font-size="11.5" class="b a66" text-anchor="start" style="fill:#94a3b8">0/20</text>
+<text x="244" y="232" font-size="12" class="" text-anchor="start">network off</text>
+<circle cx="332.0" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="332.0" cy="228" r="4.2" fill="#22c55e" class="a67"/>
+<circle cx="343.5" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="343.5" cy="228" r="4.2" fill="#22c55e" class="a68"/>
+<circle cx="355.0" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="355.0" cy="228" r="4.2" fill="#22c55e" class="a69"/>
+<circle cx="366.5" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="366.5" cy="228" r="4.2" fill="#22c55e" class="a70"/>
+<circle cx="378.0" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="378.0" cy="228" r="4.2" fill="#22c55e" class="a71"/>
+<circle cx="389.5" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="389.5" cy="228" r="4.2" fill="#22c55e" class="a72"/>
+<circle cx="401.0" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="401.0" cy="228" r="4.2" fill="#22c55e" class="a73"/>
+<circle cx="412.5" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="412.5" cy="228" r="4.2" fill="#22c55e" class="a74"/>
+<circle cx="424.0" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="424.0" cy="228" r="4.2" fill="#22c55e" class="a75"/>
+<circle cx="435.5" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="435.5" cy="228" r="4.2" fill="#22c55e" class="a76"/>
+<circle cx="447.0" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="447.0" cy="228" r="4.2" fill="#22c55e" class="a77"/>
+<circle cx="458.5" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="458.5" cy="228" r="4.2" fill="#22c55e" class="a78"/>
+<circle cx="470.0" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="470.0" cy="228" r="4.2" fill="#22c55e" class="a79"/>
+<circle cx="481.5" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="481.5" cy="228" r="4.2" fill="#22c55e" class="a80"/>
+<circle cx="493.0" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="493.0" cy="228" r="4.2" fill="#22c55e" class="a81"/>
+<circle cx="504.5" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="504.5" cy="228" r="4.2" fill="#22c55e" class="a82"/>
+<circle cx="516.0" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="516.0" cy="228" r="4.2" fill="#22c55e" class="a83"/>
+<circle cx="527.5" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="527.5" cy="228" r="4.2" fill="#22c55e" class="a84"/>
+<circle cx="539.0" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="539.0" cy="228" r="4.2" fill="#22c55e" class="a85"/>
+<circle cx="550.5" cy="228" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="550.5" cy="228" r="4.2" fill="#22c55e" class="a86"/>
+<text x="566" y="232" font-size="11.5" class="b a87" text-anchor="start" style="fill:#94a3b8">0/20</text>
+<text x="244" y="258" font-size="12" class="" text-anchor="start">timezone</text>
+<circle cx="332.0" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="332.0" cy="254" r="4.2" fill="#22c55e" class="a88"/>
+<circle cx="343.5" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="343.5" cy="254" r="4.2" fill="#22c55e" class="a89"/>
+<circle cx="355.0" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="355.0" cy="254" r="4.2" fill="#22c55e" class="a90"/>
+<circle cx="366.5" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="366.5" cy="254" r="4.2" fill="#22c55e" class="a91"/>
+<circle cx="378.0" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="378.0" cy="254" r="4.2" fill="#22c55e" class="a92"/>
+<circle cx="389.5" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="389.5" cy="254" r="4.2" fill="#22c55e" class="a93"/>
+<circle cx="401.0" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="401.0" cy="254" r="4.2" fill="#22c55e" class="a94"/>
+<circle cx="412.5" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="412.5" cy="254" r="4.2" fill="#22c55e" class="a95"/>
+<circle cx="424.0" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="424.0" cy="254" r="4.2" fill="#22c55e" class="a96"/>
+<circle cx="435.5" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="435.5" cy="254" r="4.2" fill="#22c55e" class="a97"/>
+<circle cx="447.0" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="447.0" cy="254" r="4.2" fill="#22c55e" class="a98"/>
+<circle cx="458.5" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="458.5" cy="254" r="4.2" fill="#22c55e" class="a99"/>
+<circle cx="470.0" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="470.0" cy="254" r="4.2" fill="#22c55e" class="a100"/>
+<circle cx="481.5" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="481.5" cy="254" r="4.2" fill="#22c55e" class="a101"/>
+<circle cx="493.0" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="493.0" cy="254" r="4.2" fill="#22c55e" class="a102"/>
+<circle cx="504.5" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="504.5" cy="254" r="4.2" fill="#22c55e" class="a103"/>
+<circle cx="516.0" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="516.0" cy="254" r="4.2" fill="#22c55e" class="a104"/>
+<circle cx="527.5" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="527.5" cy="254" r="4.2" fill="#22c55e" class="a105"/>
+<circle cx="539.0" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="539.0" cy="254" r="4.2" fill="#22c55e" class="a106"/>
+<circle cx="550.5" cy="254" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="550.5" cy="254" r="4.2" fill="#22c55e" class="a107"/>
+<text x="566" y="258" font-size="11.5" class="b a108" text-anchor="start" style="fill:#94a3b8">0/20</text>
+<text x="244" y="284" font-size="12" class="" text-anchor="start">parallel</text>
+<circle cx="332.0" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="332.0" cy="280" r="4.2" fill="#22c55e" class="a109"/>
+<circle cx="343.5" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="343.5" cy="280" r="4.2" fill="#22c55e" class="a110"/>
+<circle cx="355.0" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="355.0" cy="280" r="4.2" fill="#22c55e" class="a111"/>
+<circle cx="366.5" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="366.5" cy="280" r="4.2" fill="#22c55e" class="a112"/>
+<circle cx="378.0" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="378.0" cy="280" r="4.2" fill="#22c55e" class="a113"/>
+<circle cx="389.5" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="389.5" cy="280" r="4.2" fill="#22c55e" class="a114"/>
+<circle cx="401.0" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="401.0" cy="280" r="4.2" fill="#22c55e" class="a115"/>
+<circle cx="412.5" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="412.5" cy="280" r="4.2" fill="#22c55e" class="a116"/>
+<circle cx="424.0" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="424.0" cy="280" r="4.2" fill="#22c55e" class="a117"/>
+<circle cx="435.5" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="435.5" cy="280" r="4.2" fill="#22c55e" class="a118"/>
+<circle cx="447.0" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="447.0" cy="280" r="4.2" fill="#22c55e" class="a119"/>
+<circle cx="458.5" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="458.5" cy="280" r="4.2" fill="#22c55e" class="a120"/>
+<circle cx="470.0" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="470.0" cy="280" r="4.2" fill="#22c55e" class="a121"/>
+<circle cx="481.5" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="481.5" cy="280" r="4.2" fill="#22c55e" class="a122"/>
+<circle cx="493.0" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="493.0" cy="280" r="4.2" fill="#22c55e" class="a123"/>
+<circle cx="504.5" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="504.5" cy="280" r="4.2" fill="#22c55e" class="a124"/>
+<circle cx="516.0" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="516.0" cy="280" r="4.2" fill="#22c55e" class="a125"/>
+<circle cx="527.5" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="527.5" cy="280" r="4.2" fill="#22c55e" class="a126"/>
+<circle cx="539.0" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="539.0" cy="280" r="4.2" fill="#22c55e" class="a127"/>
+<circle cx="550.5" cy="280" r="4.2" fill="none" stroke="#475569"/>
+<circle cx="550.5" cy="280" r="4.2" fill="#22c55e" class="a128"/>
+<text x="566" y="284" font-size="11.5" class="b a129" text-anchor="start" style="fill:#94a3b8">0/20</text>
+<text x="244" y="310" font-size="11" class="muted" text-anchor="start">20 runs each · a fresh pytest process per run · fixed seeds</text>
+<rect x="624" y="88" width="236" height="234" rx="12" fill="#1e293b" stroke="#334155"/>
+<circle cx="647" cy="114" r="11" fill="#38bdf8"/>
+<text x="647" y="118.5" font-size="12" class="b" text-anchor="middle" style="fill:#0f172a">3</text>
+<text x="666" y="118.5" font-size="13.5" class="b" text-anchor="start">Decide with statistics</text>
+<text x="640" y="142" font-size="11" class="muted" text-anchor="start">95% Wilson intervals, failure rate</text>
+<text x="644" y="168" font-size="11" class="muted" text-anchor="start">baseline 0/20</text>
+<rect x="644.0" y="176" width="30.7" height="9" rx="4.5" fill="#22c55e" fill-opacity="0.85" class="a130"/>
+<text x="644" y="206" font-size="11" class="b" text-anchor="start">order 13/20</text>
+<rect x="726.6" y="214" width="74.9" height="9" rx="4.5" fill="#f43f5e" fill-opacity="0.85" class="a131"/>
+<text x="644" y="242" font-size="11" class="muted" text-anchor="start">other 4 conditions: 0/20 each</text>
+<rect x="644.0" y="250" width="30.7" height="9" rx="4.5" fill="#22c55e" fill-opacity="0.85" class="a132"/>
+<line x1="644" y1="270" x2="836" y2="270" stroke="#475569"/>
+<text x="644.0" y="284" font-size="10" class="muted" text-anchor="middle">0</text>
+<text x="740.0" y="284" font-size="10" class="muted" text-anchor="middle">0.5</text>
+<text x="836.0" y="284" font-size="10" class="muted" text-anchor="middle">1</text>
+<text x="640" y="308" font-size="12.5" class="b a133" text-anchor="start" style="fill:#38bdf8">no overlap → order is the cause</text>
+<rect x="20" y="334" width="840" height="110" rx="12" fill="#1e293b" stroke="#334155"/>
+<circle cx="43" cy="360" r="11" fill="#38bdf8"/>
+<text x="43" y="364.5" font-size="12" class="b" text-anchor="middle" style="fill:#0f172a">4</text>
+<text x="62" y="364.5" font-size="13.5" class="b" text-anchor="start">A diagnosis you can act on</text>
+<text x="36" y="390" font-size="14" class="mono b a134" text-anchor="start" style="fill:#fbbf24">order_dependent</text>
+<text x="172" y="390" font-size="13" class="a134" text-anchor="start">the test depends on state that other tests leave behind</text>
+<text x="36" y="413" font-size="11.5" class="muted a135" text-anchor="start">repro, failed 3/3 replays:</text>
+<text x="192" y="413" font-size="11" class="mono a135" text-anchor="start">PYTHONHASHSEED=0 TZ=UTC python -m pytest --randomly-seed=1806341205 tests/test_registry.py</text>
+<text x="36" y="434" font-size="11.5" class="muted a136" text-anchor="start">Reported in the GitHub Actions job summary, as an annotation on the test, and as JSON.</text>
+<g class="a137"><rect x="20" y="456" width="205" height="46" rx="10" fill="#1e293b" stroke="#334155"/><text x="32" y="485" font-size="18" class="b" text-anchor="start" style="fill:#38bdf8">6/6</text><text x="92" y="475" font-size="10.5" class="muted" text-anchor="start">seeded flaky-test</text><text x="92" y="490" font-size="10.5" class="muted" text-anchor="start">categories diagnosed</text></g>
+<g class="a138"><rect x="231" y="456" width="205" height="46" rx="10" fill="#1e293b" stroke="#334155"/><text x="243" y="485" font-size="18" class="b" text-anchor="start" style="fill:#38bdf8">13</text><text x="303" y="475" font-size="10.5" class="muted" text-anchor="start">CI jobs green on</text><text x="303" y="490" font-size="10.5" class="muted" text-anchor="start">Linux, macOS, Windows</text></g>
+<g class="a139"><rect x="442" y="456" width="205" height="46" rx="10" fill="#1e293b" stroke="#334155"/><text x="454" y="485" font-size="18" class="b" text-anchor="start" style="fill:#38bdf8">95%</text><text x="514" y="475" font-size="10.5" class="muted" text-anchor="start">branch coverage</text><text x="514" y="490" font-size="10.5" class="muted" text-anchor="start">across 69 tests</text></g>
+<g class="a140"><rect x="653" y="456" width="205" height="46" rx="10" fill="#1e293b" stroke="#334155"/><text x="665" y="485" font-size="18" class="b" text-anchor="start" style="fill:#38bdf8">13/20</text><text x="725" y="475" font-size="10.5" class="muted" text-anchor="start">same order result on</text><text x="725" y="490" font-size="10.5" class="muted" text-anchor="start">Linux CI and Windows</text></g>
+</svg>

@@ -3,6 +3,7 @@
 [![CI](https://github.com/Rowan-gne/NullCase/actions/workflows/ci.yml/badge.svg)](https://github.com/Rowan-gne/NullCase/actions/workflows/ci.yml)
 ![Python 3.11–3.14](https://img.shields.io/badge/python-3.11%E2%80%933.14-blue)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![First Look](https://img.youtube.com/vi/o39lXgtWzXU/maxresdefault.jpg)](https://youtu.be/o39lXgtWzXU)
 
 **Finds out *why* a flaky pytest test is flaky, by controlled experiment.**
 

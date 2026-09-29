@@ -73,6 +73,41 @@ way, and it's open as draft PR
 Action also diagnoses the test as `order_dependent`
 ([run](https://github.com/Rowan-gne/nullcase-demo/actions/runs/36517093002)).
 
+### Why combine measurement with a model
+
+| | Flaky-test detector | A coding agent on its own (e.g. Claude Code) | NullCase |
+|---|---|---|---|
+| Finds flaky tests | Yes, from re-runs or CI history | Only if told which test | Yes, from repeated runs |
+| Says *why* it's flaky | No | A guess from reading the code | Measured: one factor changed at a time |
+| Writes a fix | No; usually quarantines or retries | Yes | Yes, the model's only job |
+| Proves the fix works | Nothing to prove | Its own judgement, or a few re-runs | The same experiments, re-run until they pass every time |
+
+Each half covers what the other can't:
+
+- **Detection alone stops at "this test sometimes fails."** Retrying or
+  quarantining hides the failure but leaves the bug in place.
+- **A model alone is guessing about something it can't see.** A flaky test
+  usually passes, so a few re-runs after a change prove little. The quickest
+  ways to turn a test green (a skip, a retry, a looser assertion, a longer
+  sleep) are exactly the wrong fixes.
+- **Measurement gives the model a narrow question.** Instead of "why is this
+  flaky?", it gets "this fails only when test order changes; here's a seed
+  that reproduces it, and the code involved." In the run above it answered
+  with one fixture on the first attempt, for about a cent.
+- **Measurement also decides the answer, so the model never marks its own
+  work.** In the seeded-tests run below, the gate turned down two timezone
+  patches before accepting a third:
+  - one edited the assertion;
+  - one broke a healthy test elsewhere.
+
+  In the gate's own check, it rejected all 9 hand-written cheat patches
+  (skips, weakened or swallowed assertions, config edits and a no-op).
+- **Only the fix step costs model tokens.** Detection and diagnosis are plain
+  test runs. Nothing is sent to a model when no flaky test is found.
+
+This hasn't been benchmarked against other tools. The comparison describes
+what each approach can know, not measured scores.
+
 ### Across the demo's seeded tests
 
 On 2026-09-28, `claude-sonnet-5-5` got one live run on each seeded flaky test

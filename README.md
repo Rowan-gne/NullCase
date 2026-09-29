@@ -48,10 +48,28 @@ shortened, and the command is wrapped to fit narrow screens.*
 > Version 0.1.0 is prepared but not yet published to PyPI or the GitHub
 > Marketplace.
 
-The private service goes one step further. It asks a model for a fix and
-accepts it only if the same experiments now pass every time. On 2026-09-28,
-`claude-sonnet-5-5` got one live run on each seeded flaky test in the demo
-repository.
+## Where the AI comes in
+
+Everything in this repository is measurement. The plugin records every test
+result, and the battery re-runs a test under controlled conditions and uses
+statistics to say why it fails.
+
+NullCase's private service adds one step on top: it asks a model (Claude) for
+a patch. It then re-runs the same experiments on the patched code, and
+accepts the patch only if they now pass every time. The model never judges
+its own patch.
+
+Here is one recorded run of the whole loop, on a flaky test added to the demo
+repository on 2026-09-29:
+
+<p align="center">
+  <img src="assets/ai-workflow.svg" width="880" alt="One recorded NullCase run on a new flaky test in Rowan-gne/nullcase-demo, in five steps. 1 Detect, no AI: 10 runs of the whole suite; tests/test_pricing.py::test_prices_default_to_usd failed 7 of 10, so it is flaky. 2 Diagnose, no AI: 20 runs per condition, one factor at a time; only test order changes the failure rate (17 of 20 against 0 of 20), so it is order_dependent, with a repro that failed 3 of 3. 3 Fix, the only AI step: claude-sonnet-5-5 is given the test file, the code it imports and the evidence, with no tools; it returns the root cause (a functools.cache'd setting that the currency tests leave set) and a new tests/conftest.py that clears the cache around every test, for $0.0116. 4 Gate, no AI: the same experiments on the patched code, test order failures 17 of 20 to 0 of 20, 0 failures in 120 runs, nothing else newly failing. 5 Pull request: a draft PR with the evidence; a person decides.">
+</p>
+
+### Across the demo's seeded tests
+
+On 2026-09-28, `claude-sonnet-5-5` got one live run on each seeded flaky test
+in the demo repository.
 
 - **Fixed:** all 5 tests NullCase diagnosed as fixable (order, hash order,
   timezone, concurrency and timing), 4 of them on the first attempt, for

@@ -66,6 +66,13 @@ repository on 2026-09-29:
   <img src="assets/ai-workflow.svg" width="880" alt="One recorded NullCase run on a new flaky test in Rowan-gne/nullcase-demo, in five steps. 1 Detect, no AI: 10 runs of the whole suite; tests/test_pricing.py::test_prices_default_to_usd failed 7 of 10, so it is flaky. 2 Diagnose, no AI: 20 runs per condition, one factor at a time; only test order changes the failure rate (17 of 20 against 0 of 20), so it is order_dependent, with a repro that failed 3 of 3. 3 Fix, the only AI step: claude-sonnet-5-5 is given the test file, the code it imports and the evidence, with no tools; it returns the root cause (a functools.cache'd setting that the currency tests leave set) and a new tests/conftest.py that clears the cache around every test, for $0.0116. 4 Gate, no AI: the same experiments on the patched code, test order failures 17 of 20 to 0 of 20, 0 failures in 120 runs, nothing else newly failing. 5 Pull request: a draft PR with the evidence; a person decides.">
 </p>
 
+Later the same day, a second live call was made separately on the same test.
+It produced exactly the same patch ($0.0111), which passed the gate the same
+way, and it's open as draft PR
+[#6](https://github.com/Rowan-gne/nullcase-demo/pull/6). In CI, NullCase's
+Action also diagnoses the test as `order_dependent`
+([run](https://github.com/Rowan-gne/nullcase-demo/actions/runs/36517093002)).
+
 ### Across the demo's seeded tests
 
 On 2026-09-28, `claude-sonnet-5-5` got one live run on each seeded flaky test

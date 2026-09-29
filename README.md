@@ -297,6 +297,8 @@ The timezone result depends on the time of day the harness runs.
 - [SECURITY.md](SECURITY.md): how to report a vulnerability, and why the
   battery should only be run on code you trust.
 
+  ▶️ [First Look](https://youtu.be/o39lXgtWzXU)
+
 ## License
 
 [MIT](LICENSE)

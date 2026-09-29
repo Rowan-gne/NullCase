@@ -69,7 +69,8 @@ passes alone and fails when another test runs before it:
 > PYTHONHASHSEED=0 TZ=UTC python -m pytest -p no:cacheprovider -q --randomly-seed=3626764237 test_registry.py
 > ```
 
-Each diagnosed test also gets an annotation on its file. Possible diagnoses:
+Each diagnosed test also gets an annotation on its file (no line number yet).
+Possible diagnoses:
 `order_dependent`, `hash_order`, `network`, `timezone`, `concurrency`,
 `timing`, `fails_consistently` (likely broken, not flaky) and `not_reproduced`
 (didn't fail on the runner under any condition).

@@ -86,6 +86,13 @@ def test_battery_cli_json_output(project: Path, capsys: pytest.CaptureFixture[st
     assert report["repro"]["confirmed_failures"] == report["repro"]["confirm_runs"] == 3
 
 
+@pytest.mark.parametrize("value", ["0", "-1", "two"])
+def test_jobs_must_be_a_positive_integer(value: str) -> None:
+    with pytest.raises(SystemExit) as exc:
+        main(["--jobs", value, "test_state.py::test_victim"])
+    assert exc.value.code == 2
+
+
 def test_battery_cli_reports_errors_with_exit_code_2(
     project: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

@@ -4,6 +4,12 @@ Every run is a fresh ``python -m pytest`` subprocess in the target project,
 with results read back through the nullcase-pytest plugin. The baseline pins
 every factor the perturbations vary (test order, hash seed, timezone, serial
 execution, network allowed); each perturbation varies exactly one of them.
+
+Runs go through a thread pool of ``jobs`` workers. With the default of one,
+runs never overlap; more workers overlap runs of the same test, which is only
+sound for tests that share no files, ports or other state between processes.
+Results are always read back in plan order, so the diagnosis and repro don't
+depend on ``jobs``.
 """
 
 from __future__ import annotations
@@ -14,7 +20,9 @@ import random
 import shlex
 import subprocess
 import tempfile
-from collections.abc import Callable, Collection, Mapping
+from collections.abc import Callable, Collection, Generator, Mapping, Sequence
+from concurrent.futures import Future, ThreadPoolExecutor
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import get_args
@@ -175,6 +183,16 @@ def check_environment(python: str) -> None:
         )
 
 
+@contextmanager
+def _run_pool(jobs: int) -> Generator[ThreadPoolExecutor, None, None]:
+    pool = ThreadPoolExecutor(max_workers=jobs, thread_name_prefix="nullcase-run")
+    try:
+        yield pool
+    finally:
+        # If the battery stops early (an error or Ctrl-C), queued runs are dropped, not run.
+        pool.shutdown(cancel_futures=True)
+
+
 def run_battery(
     target: Target,
     *,
@@ -183,51 +201,78 @@ def run_battery(
     confirm_runs: int = 3,
     perturbations: Collection[PerturbationName] = ALL_PERTURBATIONS,
     timeout_s: float = 120.0,
+    jobs: int = 1,
     progress: Callable[[str], None] = lambda _: None,
 ) -> BatteryReport:
+    if jobs < 1:
+        raise ValueError(f"jobs must be at least 1, got {jobs}")
     check_environment(target.python)
     baseline_specs, perturbation_specs = plan(target.nodeid, baseline_runs, runs, perturbations)
 
-    progress("baseline")
-    baseline_outcomes = [run_once(target, spec, timeout_s) for spec in baseline_specs]
-    if all(outcome is None for outcome in baseline_outcomes):
-        raise BatteryError(
-            f"{target.nodeid!r} produced no result in any baseline run. Check that the node ID"
-            " is relative to the project's pytest rootdir and that the project's tests run."
-        )
-    baseline = Rate(sum(map(_failed, baseline_outcomes)), len(baseline_outcomes))
+    with _run_pool(jobs) as pool:
 
-    outcomes: dict[PerturbationName, list[tuple[RunSpec, bool]]] = {}
-    rates: dict[PerturbationName, Rate] = {}
-    for name, specs in perturbation_specs.items():
-        progress(name)
-        outcomes[name] = [(spec, _failed(run_once(target, spec, timeout_s))) for spec in specs]
-        rates[name] = Rate(sum(f for _, f in outcomes[name]), len(specs))
+        def start(specs: Sequence[RunSpec]) -> list[Future[str | None]]:
+            return [pool.submit(run_once, target, spec, timeout_s) for spec in specs]
 
-    def replay_failures(spec: RunSpec) -> int:
-        progress(f"confirming {spec.setting}")
-        return sum(_failed(run_once(target, spec, timeout_s)) for _ in range(confirm_runs))
+        progress("baseline")
+        baseline_outcomes = [run.result() for run in start(baseline_specs)]
+        if all(outcome is None for outcome in baseline_outcomes):
+            raise BatteryError(
+                f"{target.nodeid!r} produced no result in any baseline run. Check that the node"
+                " ID is relative to the project's pytest rootdir and that the project's tests run."
+            )
+        baseline = Rate(sum(map(_failed, baseline_outcomes)), len(baseline_outcomes))
 
-    diagnosis = diagnose(baseline, rates)
-    repro = None
-    if flip_eligible(diagnosis):
-        diagnosis, repro = _deterministic_flip(
-            target, baseline, outcomes, diagnosis, replay_failures, confirm_runs
-        )
-    if repro is None:
-        candidates: list[RunSpec] = []
-        if diagnosis.significant and diagnosis.significant[0] in DETERMINISTIC:
-            failing = [spec for spec, f in outcomes[diagnosis.significant[0]] if f]
-            candidates = _distinct_settings(failing)[:3]
-        elif diagnosis.category == "fails_consistently" or (
-            diagnosis.method == "deterministic_flip" and baseline.failures == baseline.runs
-        ):
-            candidates = baseline_specs[:1]
-        for spec in candidates:
-            confirmed = replay_failures(spec)
-            if confirmed == confirm_runs:
-                repro = Repro(repro_command(target, spec), spec.setting, confirmed, confirm_runs)
-                break
+        # Queue every perturbation run at once so workers never idle between perturbations.
+        started = {name: start(specs) for name, specs in perturbation_specs.items()}
+        outcomes: dict[PerturbationName, list[tuple[RunSpec, bool]]] = {}
+        rates: dict[PerturbationName, Rate] = {}
+        for name, specs in perturbation_specs.items():
+            progress(name)
+            outcomes[name] = [
+                (spec, _failed(run.result()))
+                for spec, run in zip(specs, started[name], strict=True)
+            ]
+            rates[name] = Rate(sum(f for _, f in outcomes[name]), len(specs))
+
+        def replay_failures(spec: RunSpec, expect_failure: bool) -> int:
+            """Failures in up to ``confirm_runs`` replays of ``spec``, ``jobs`` at a time.
+
+            Every caller needs all replays to agree, so replaying stops after the
+            first batch with an outcome other than ``expect_failure``.
+            """
+            progress(f"confirming {spec.setting}")
+            failures = 0
+            for done in range(0, confirm_runs, jobs):
+                size = min(jobs, confirm_runs - done)
+                batch = [_failed(run.result()) for run in start([spec] * size)]
+                failures += sum(batch)
+                if any(failed != expect_failure for failed in batch):
+                    break
+            return failures
+
+        diagnosis = diagnose(baseline, rates)
+        repro = None
+        if flip_eligible(diagnosis):
+            diagnosis, repro = _deterministic_flip(
+                target, baseline, outcomes, diagnosis, replay_failures, confirm_runs
+            )
+        if repro is None:
+            candidates: list[RunSpec] = []
+            if diagnosis.significant and diagnosis.significant[0] in DETERMINISTIC:
+                failing = [spec for spec, f in outcomes[diagnosis.significant[0]] if f]
+                candidates = _distinct_settings(failing)[:3]
+            elif diagnosis.category == "fails_consistently" or (
+                diagnosis.method == "deterministic_flip" and baseline.failures == baseline.runs
+            ):
+                candidates = baseline_specs[:1]
+            for spec in candidates:
+                confirmed = replay_failures(spec, True)
+                if confirmed == confirm_runs:
+                    repro = Repro(
+                        repro_command(target, spec), spec.setting, confirmed, confirm_runs
+                    )
+                    break
     return BatteryReport(target, baseline, rates, diagnosis, repro)
 
 
@@ -236,7 +281,7 @@ def _deterministic_flip(
     baseline: Rate,
     outcomes: dict[PerturbationName, list[tuple[RunSpec, bool]]],
     diagnosis: Diagnosis,
-    replay_failures: Callable[[RunSpec], int],
+    replay_failures: Callable[[RunSpec, bool], int],
     confirm_runs: int,
 ) -> tuple[Diagnosis, Repro | None]:
     """Look for a deterministic setting that flips a constant baseline's outcome.
@@ -256,7 +301,7 @@ def _deterministic_flip(
 
     for name in sorted(flips, key=most_flips_first):
         for spec in flips[name][:3]:
-            if is_confirmed_flip(baseline, replay_failures(spec), confirm_runs):
+            if is_confirmed_flip(baseline, replay_failures(spec, opposite), confirm_runs):
                 # The failing side is deterministic: the flip setting if the
                 # baseline passes, otherwise the pinned baseline (confirmed below).
                 repro = (

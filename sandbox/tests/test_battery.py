@@ -1,14 +1,19 @@
 import os
 import subprocess
 import sys
+import threading
+import time
+from collections.abc import Callable
 from pathlib import Path
 
+import nullcase_sandbox.battery as battery
 import pytest
 from nullcase_sandbox.battery import (
     ORDER_SEEDS,
     PINNED_ENV,
     TIMEZONES,
     BatteryError,
+    RunSpec,
     Target,
     plan,
     run_battery,
@@ -170,3 +175,80 @@ def test_flip_diagnoses_hash_test_that_fails_under_a_rare_seed(tmp_path: Path) -
     assert report.diagnosis.category == "hash_order"
     assert report.diagnosis.method == "deterministic_flip"
     assert report.repro is not None and report.repro.setting.startswith("PYTHONHASHSEED=")
+
+
+class FakeRuns:
+    """Stands in for run_once: outcome(spec, n) decides the nth run of spec's setting."""
+
+    def __init__(self, outcome: Callable[[RunSpec, int], str], delay_s: float = 0.0) -> None:
+        self.outcome = outcome
+        self.delay_s = delay_s
+        self.calls: list[str] = []
+        self.active = self.max_active = 0
+        self._lock = threading.Lock()
+
+    def __call__(self, target: Target, spec: RunSpec, timeout_s: float) -> str:
+        with self._lock:
+            self.calls.append(spec.setting)
+            n = self.calls.count(spec.setting)
+            self.active += 1
+            self.max_active = max(self.max_active, self.active)
+        time.sleep(self.delay_s)
+        with self._lock:
+            self.active -= 1
+        return self.outcome(spec, n)
+
+
+@pytest.fixture
+def fake_target(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Target:
+    def environment_ok(python: str) -> None:
+        pass
+
+    monkeypatch.setattr(battery, "check_environment", environment_ok)
+    return Target(tmp_path, "test_x.py::test_y", sys.executable)
+
+
+def by_setting(spec: RunSpec, n: int) -> str:
+    seed = spec.setting.removeprefix("--randomly-seed=")
+    fails = (seed.isdigit() and int(seed) % 3 == 0) or spec.setting == "TZ=AAA-14"
+    return "failed" if fails else "passed"
+
+
+@pytest.mark.parametrize("jobs", [2, 4])
+def test_jobs_overlap_runs_without_changing_the_report(
+    monkeypatch: pytest.MonkeyPatch, fake_target: Target, jobs: int
+) -> None:
+    serial = FakeRuns(by_setting, delay_s=0.002)
+    monkeypatch.setattr(battery, "run_once", serial)
+    expected = run_battery(fake_target, jobs=1)
+
+    concurrent = FakeRuns(by_setting, delay_s=0.002)
+    monkeypatch.setattr(battery, "run_once", concurrent)
+    steps: list[str] = []
+    assert run_battery(fake_target, jobs=jobs, progress=steps.append) == expected
+
+    assert expected.diagnosis.category == "order_dependent"
+    assert expected.repro is not None
+    assert serial.max_active == 1
+    assert 1 < concurrent.max_active <= jobs
+    assert sorted(concurrent.calls) == sorted(serial.calls)
+    assert steps[: 1 + len(battery.ALL_PERTURBATIONS)] == ["baseline", *battery.ALL_PERTURBATIONS]
+
+
+def test_replays_stop_at_the_first_disagreeing_outcome(
+    monkeypatch: pytest.MonkeyPatch, fake_target: Target
+) -> None:
+    # Each order seed fails on its first run only, so no replay confirms it.
+    runs = FakeRuns(lambda spec, n: "failed" if spec.setting != "pinned" and n == 1 else "passed")
+    monkeypatch.setattr(battery, "run_once", runs)
+    report = run_battery(fake_target, baseline_runs=20, runs=20, perturbations=["order"])
+
+    assert report.diagnosis.category == "order_dependent"
+    assert report.repro is None
+    # Three candidate seeds, each dropped after one replay instead of three.
+    assert len(runs.calls) == 20 + 20 + 3
+
+
+def test_jobs_must_be_positive(fake_target: Target) -> None:
+    with pytest.raises(ValueError, match="jobs"):
+        run_battery(fake_target, jobs=0)

@@ -57,7 +57,16 @@ uv run nullcase-battery --project path/to/project tests/test_x.py::test_y
 
 Options: `--baseline-runs N` and `--runs N` (default 20 each), `--only
 order,hash_seed` (comma-separated), `--python PATH` (an interpreter with the project's dependencies
-plus this package installed), `--json`.
+plus this package installed), `--jobs N`, `--json`.
+
+**Faster runs.** `--jobs N` executes up to N runs at once (default 1). On the
+demo's order-dependent test, the full battery took 53 s with `--jobs 1` and
+19 s with `--jobs 4` on a 4-core machine, with identical reports: results are
+read back in plan order, so the diagnosis and repro don't depend on N. Runs of
+the test then overlap, though, so use it only for tests that share no files,
+ports or other state between processes; otherwise the overlap itself can make
+the baseline fail. Confirmation replays stop at the first replay that
+disagrees, since a repro or flip needs every replay to agree.
 
 ### Docker
 

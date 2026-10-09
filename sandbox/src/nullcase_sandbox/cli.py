@@ -38,6 +38,14 @@ def main(argv: list[str] | None = None) -> int:
         metavar="NAME[,NAME...]",
         help=f"comma-separated perturbations to run (from: {', '.join(ALL_PERTURBATIONS)})",
     )
+    parser.add_argument(
+        "--jobs",
+        type=positive_int,
+        default=1,
+        metavar="N",
+        help="runs to execute at once (default: 1). Above 1, runs of the test overlap, so use"
+        " it only for tests that share no files, ports or other state between processes",
+    )
     parser.add_argument("--json", action="store_true", help="print the report as JSON")
     args = parser.parse_args(argv)
 
@@ -48,6 +56,7 @@ def main(argv: list[str] | None = None) -> int:
             baseline_runs=args.baseline_runs,
             runs=args.runs,
             perturbations=args.only,
+            jobs=args.jobs,
             progress=lambda step: print(f"… {step}", file=sys.stderr, flush=True),
         )
     except BatteryError as exc:
@@ -67,6 +76,12 @@ def perturbation_list(value: str) -> list[PerturbationName]:
             f" choose from {', '.join(ALL_PERTURBATIONS)}"
         )
     return [name for name in ALL_PERTURBATIONS if name in names]
+
+
+def positive_int(value: str) -> int:
+    if not value.isdigit() or int(value) < 1:
+        raise argparse.ArgumentTypeError(f"expected a positive integer, got {value!r}")
+    return int(value)
 
 
 def _row(name: str, rate: Rate, note: str) -> str:

@@ -101,6 +101,7 @@ def test_settings_defaults_and_explicit_tests() -> None:
         budget_s=900.0,
         baseline_runs=20,
         runs=20,
+        jobs=1,
         sandbox_source="",
     )
     assert read_settings({"NULLCASE_DIAGNOSE": "Failed"}).diagnose_failed
@@ -183,6 +184,7 @@ def test_diagnoses_an_order_dependent_test_end_to_end(tmp_path: Path) -> None:
         NULLCASE_DIAGNOSE_TESTS="test_registry.py::test_first_registration_gets_id_1",
         NULLCASE_BASELINE_RUNS="10",
         NULLCASE_RUNS="10",
+        NULLCASE_JOBS="4",  # the fixture keeps its state in memory, so runs can overlap
         GITHUB_STEP_SUMMARY=str(summary),
         GITHUB_OUTPUT=str(output),
         GITHUB_WORKSPACE=str(tmp_path),

@@ -50,6 +50,10 @@ inputs:
     description: Runs per perturbation per diagnosed test.
     required: false
     default: "20"
+  jobs:
+    description: Battery runs executed at once. Above 1, only for tests that share no files, ports or other state.
+    required: false
+    default: "1"
   sandbox-source:
     description: pip requirement for nullcase-sandbox, installed only when diagnosing.
     required: false
@@ -80,5 +84,6 @@ runs:
         NULLCASE_DIAGNOSE_TIMEOUT_MINUTES: ${{ inputs.diagnose-timeout-minutes }}
         NULLCASE_BASELINE_RUNS: ${{ inputs.baseline-runs }}
         NULLCASE_RUNS: ${{ inputs.runs }}
+        NULLCASE_JOBS: ${{ inputs.jobs }}
         NULLCASE_SANDBOX_SOURCE: ${{ inputs.sandbox-source }}
       run: '"${NULLCASE_PYTHON:-python}" "$GITHUB_ACTION_PATH/entrypoint.py"'

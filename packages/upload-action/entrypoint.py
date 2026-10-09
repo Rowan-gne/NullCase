@@ -21,6 +21,7 @@ dependencies, and configures it through environment variables:
   NULLCASE_DIAGNOSE_TIMEOUT_MINUTES  time budget for all diagnoses (default 15)
   NULLCASE_BASELINE_RUNS     battery baseline runs (default 20)
   NULLCASE_RUNS              battery runs per perturbation (default 20)
+  NULLCASE_JOBS              battery runs executed at once (default 1)
   NULLCASE_SANDBOX_SOURCE    pip requirement or path for nullcase-sandbox
 """
 
@@ -64,6 +65,7 @@ class Settings:
     budget_s: float
     baseline_runs: int
     runs: int
+    jobs: int
     sandbox_source: str
 
 
@@ -96,6 +98,7 @@ def read_settings(env: Mapping[str, str]) -> Settings:
         budget_s=60.0 * _positive_int(env, "NULLCASE_DIAGNOSE_TIMEOUT_MINUTES", 15),
         baseline_runs=_positive_int(env, "NULLCASE_BASELINE_RUNS", 20),
         runs=_positive_int(env, "NULLCASE_RUNS", 20),
+        jobs=_positive_int(env, "NULLCASE_JOBS", 1),
         sandbox_source=env.get("NULLCASE_SANDBOX_SOURCE", "").strip(),
     )
 
@@ -145,14 +148,14 @@ def read_records(results: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in lines if line.strip()]
 
 
-def upload(results: Path) -> None:
+def upload(results: Path, records: Sequence[Mapping[str, Any]]) -> None:
     from nullcase_pytest.results import ResultRecord
     from nullcase_pytest.sinks import RemoteUploadSink
 
     sink = RemoteUploadSink()
     try:
-        for line in results.read_text(encoding="utf-8").splitlines():
-            sink.write(ResultRecord(**json.loads(line)))
+        for record in records:
+            sink.write(ResultRecord(**record))
         sink.close()
     except NotImplementedError:
         # TODO: real upload, once the hosted service exists.
@@ -181,6 +184,7 @@ def run_diagnoses(targets: Sequence[str], settings: Settings, project: Path) -> 
         command = [
             *(sys.executable, "-m", "nullcase_sandbox", "--project", str(project), "--json"),
             *("--baseline-runs", str(settings.baseline_runs), "--runs", str(settings.runs)),
+            *(("--jobs", str(settings.jobs)) if settings.jobs > 1 else ()),
             nodeid,
         ]
         print(f"::group::NullCase: diagnosing {nodeid}", flush=True)
@@ -347,7 +351,7 @@ def main() -> int:
     records: list[dict[str, Any]] = []
     if results.exists() and results.stat().st_size > 0:
         records = read_records(results)
-        upload(results)
+        upload(results, records)
     else:
         print("::warning title=NullCase::pytest wrote no results; nothing to upload")
 

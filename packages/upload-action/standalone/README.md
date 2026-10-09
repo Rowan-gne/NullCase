@@ -90,6 +90,7 @@ Possible diagnoses:
 | `diagnose-timeout-minutes` | `15` | no new diagnosis starts after this |
 | `baseline-runs` | `20` | baseline runs per test |
 | `runs` | `20` | runs per perturbation per test |
+| `jobs` | `1` | battery runs executed at once; above 1, only for tests that share no files, ports or other state |
 | `sandbox-source` | `nullcase-sandbox==0.1.0` | pip requirement, installed only when diagnosing |
 
 Outputs: `results-path` (JSON Lines, one record per test) and `diagnoses-path`
@@ -100,7 +101,9 @@ Outputs: `results-path` (JSON Lines, one record per test) and `diagnoses-path`
 - **Cost.** One diagnosis is 120 separate pytest runs of one test at the
   default settings, plus a few confirmation replays. For the self-test above
   that took under a minute in local rehearsals; suites with slow start-up take
-  longer. `max-diagnoses` and `diagnose-timeout-minutes` bound it.
+  longer. `max-diagnoses` and `diagnose-timeout-minutes` bound it. `jobs`
+  overlaps runs to use more of the runner's cores, without changing the
+  diagnosis, for tests that share no state between processes.
 - **Environment.** Diagnosis installs `nullcase-sandbox`, which brings
   `pytest-randomly`, `pytest-socket`, `pytest-xdist` and `coverage` into the
   same environment, without changing your pytest version. pytest-randomly

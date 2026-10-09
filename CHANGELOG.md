@@ -21,6 +21,13 @@ Windows.
   constant baselines, and prints confirmed repro commands. There's also a
   Dockerfile.
 - `nullcase-coverage`: reports whether one test executes given lines of a file.
+- `--jobs N` runs up to N battery runs at once (default 1), for tests that
+  share no state between processes. Every perturbation's runs are queued
+  together so workers stay busy, and results are read back in plan order, so
+  the report doesn't depend on N. On the demo's order-dependent test, 4 jobs
+  took the full battery from 53 s to 19 s on 4 cores.
+- Confirmation replays stop at the first replay that disagrees, rather than
+  running all three for a setting that can no longer be confirmed.
 - `--only` takes a comma-separated list (`--only order,hash_seed`). Previously
   it took space-separated names and swallowed a node ID placed after it.
 - The Docker image is based on `python:3.14-slim`.
@@ -38,6 +45,7 @@ Windows.
   a file annotation and as JSON (`diagnoses-path`). Bounded by
   `max-diagnoses` and `diagnose-timeout-minutes`; the job's result is still
   pytest's.
+- A `jobs` input, passed to the battery as `--jobs`.
 - A `python` input for projects whose dependencies live in a virtualenv; uv
   venvs without pip are supported through `uv pip`.
 - CI runs it on Linux, macOS and Windows runners, installing the packages

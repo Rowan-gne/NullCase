@@ -251,7 +251,7 @@ Docker usage, see [sandbox/README.md](sandbox/README.md).
 ## Reproduce the numbers
 
 ```bash
-uv run pytest                                  # test suite
+uv run pytest -n auto                          # test suite, on every core
 uv run coverage run -m pytest && uv run coverage combine && uv run coverage report
 uv run pyright                                 # strict type check
 uv run python eval/harness/run_eval.py         # diagnosis eval, about 3–4 minutes

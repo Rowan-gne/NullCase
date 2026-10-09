@@ -79,9 +79,10 @@ jobs:
           EXPECTED: ${{ matrix.python }}
         run: uv run python -c "import os, sys; v = '%d.%d' % sys.version_info[:2]; assert v == os.environ['EXPECTED'], v"
 
-      # Dogfood: record this suite's own results with the nullcase-pytest plugin.
+      # Dogfood: record this suite's own results with the nullcase-pytest plugin,
+      # across every core with pytest-xdist (the plugin records once, on the controller).
       - name: Test
-        run: uv run pytest --nullcase-results=nullcase-results.jsonl
+        run: uv run pytest -n auto --nullcase-results=nullcase-results.jsonl
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
@@ -110,7 +111,7 @@ jobs:
             ./packages/pytest-plugin ./sandbox "hypothesis>=6.168"
 
       - name: Test
-        run: .venv-lowest/bin/python -m pytest
+        run: .venv-lowest/bin/python -m pytest -n auto
 
   package:
     runs-on: ubuntu-latest
